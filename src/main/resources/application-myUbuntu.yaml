@@ -1,15 +1,30 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/bip
+    url: jdbc:postgresql://localhost:5432/bip
     username: develop
     password: develop
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: smtp.mail.ru
+    port: 465
+    username: karzhavin.danil@mail.ru
+    password: ${BIP_SMTP_MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true  # Включаем SSL
+          starttls:
+            enable: false # STARTTLS не нужен, так как используем SSL
+
+
 
 
 server:

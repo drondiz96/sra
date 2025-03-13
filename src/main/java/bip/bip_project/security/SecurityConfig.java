@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String authenticatePath = "/users/authenticate";
     private static final String createUserPath = "/users/createUser";
+    private static final String verify2faPath = "/users/verify-2fa";
     JwtRequestFilter jwtRequestFilter;
 
     public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
@@ -22,7 +23,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().authorizeRequests().antMatchers(createUserPath, authenticatePath).permitAll()
+        http.csrf().disable().authorizeRequests().antMatchers(createUserPath, authenticatePath, verify2faPath).permitAll()
                 //.anyRequest().authenticated()
                 .anyRequest().permitAll()
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
