@@ -1,0 +1,91 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main  # Запускать при пуше в основную ветку
+      - develop  # Запускать при пуше в ветку develop
+  pull_request:
+    branches:
+      - main  # Запускать на создание PR в основную ветку
+      - develop  # Запускать на создание PR в ветку develop
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Клонирование кода
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # 2. Установка Docker
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      # 3. Установка Docker Compose
+      - name: Set up Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      # 4. Увеличение версии (с выбором части версии: Major, Minor, или Patch)
+      - name: Increment version
+        if: github.ref == 'refs/heads/develop'  # Выполняется только для ветки develop
+        run: |
+          # Получаем текущую версию из тега
+          VERSION=$(git describe --tags --abbrev=0)
+          echo "Current version: $VERSION"
+
+          # Параметры для изменения версии
+          INCREMENT_PART=${{ github.event.inputs.increment_part || 'patch' }}  # Если не передан параметр, по умолчанию увеличиваем Patch
+          echo "Incrementing the $INCREMENT_PART version"
+
+          # Разбираем версию на части
+          VERSION_PARTS=($(echo $VERSION | tr "." "\n"))
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+
+          # В зависимости от выбранной части версии увеличиваем ее
+          if [[ $INCREMENT_PART == "major" ]]; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif [[ $INCREMENT_PART == "minor" ]]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          elif [[ $INCREMENT_PART == "patch" ]]; then
+            PATCH=$((PATCH + 1))
+          fi
+
+          # Формируем новую версию
+          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          echo "New version: $NEW_VERSION"
+
+          # Тегируем новый коммит
+          git tag $NEW_VERSION
+          git push origin $NEW_VERSION  # Пушим новый тег в репозиторий
+
+      # 5. Сборка и запуск контейнеров
+      - name: Build and run containers
+        run: |
+          docker-compose -f docker-compose.yml up --build -d
+
+      # 6. Проверка состояния контейнеров (например, проверки логов)
+      - name: Check Docker container logs
+        run: |
+          docker-compose logs
+
+      # 7. Опционально: Вы можете добавить шаг для тестирования, например, если есть тесты, которые нужно выполнить в контейнерах
+      # - name: Run tests
+      #   run: |
+      #     docker-compose exec <service_name> npm test
