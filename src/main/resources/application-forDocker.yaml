@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgresql:5432/bip
+    username: develop
+    password: develop
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+
+server:
+  address: 0.0.0.0
+  port: 8080
+
+management:
+  server:
+    port: 8081 # Actuator работает на отдельном порту
+  security:
+    enabled: false  # Если нужно отключить безопасность для актюаторов
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # Разрешить доступ ко всем эндпоинтам
+  endpoint:
+    mappings:
+      enabled: true  # Включить эндпоинт mappings, который показывает все доступные маршруты

@@ -1,0 +1,4 @@
+FROM postgres:latest
+
+# Копируем SQL-скрипт инициализации в контейнер
+COPY init.sql /docker-entrypoint-initdb.d/
