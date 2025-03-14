@@ -10,6 +10,9 @@ public interface IUserService {
     UserDto createUser(UserDto userDto);
     void saveUser(User user);
 
+    // confirm
+    void confirmEmail(String email);
+
     User identicateAndAuthenticate(String email, String password);
 
     // read
