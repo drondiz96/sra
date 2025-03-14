@@ -44,7 +44,7 @@ jobs:
           # Получаем текущую версию из тега
           VERSION=$(git describe --tags --abbrev=0)
           echo "Current version: $VERSION"
-
+          VERSION=${VERSION#v}
           # Параметры для изменения версии
           INCREMENT_PART=${{ github.event.inputs.increment_part || 'patch' }}  # Если не передан параметр, по умолчанию увеличиваем Patch
           echo "Incrementing the $INCREMENT_PART version"
