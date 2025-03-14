@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Аргумент для выбора режима сборки
-ARG MODE=dev
+ARG MODE=prod
 
 # Сборка приложения
 RUN if [ "$MODE" = "dev" ]; then \
