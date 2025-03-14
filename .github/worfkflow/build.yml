@@ -75,6 +75,25 @@ jobs:
           git tag $NEW_VERSION
           git push origin $NEW_VERSION  # Пушим новый тег в репозиторий
 
+      - name: Check and update .env version
+        run: |
+          VERSION=$(git describe --tags --abbrev=0)
+          if [ -f .env ]; then
+            OLD_VERSION=$(grep '^VERSION=' .env | cut -d '=' -f 2)
+            echo "Old version in .env: $OLD_VERSION"
+          else
+            OLD_VERSION=""
+            echo ".env file not found, creating a new one."
+          fi
+
+          # Если версия отличается, обновляем .env
+          if [ "$OLD_VERSION" != "$VERSION" ]; then
+            echo "Updating .env with new version: $VERSION"
+            echo "VERSION=$VERSION" > .env
+          else
+            echo "Version is already up-to-date. No changes made."
+          fi
+          
       # 5. Сборка и запуск контейнеров
       - name: Build and run containers
         run: |
