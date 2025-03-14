@@ -37,6 +37,13 @@ public class UserService implements IUserService{
     }
 
     @Override
+    public void confirmEmail(String email) {
+        User user = getUserByEmail(email);
+        user.setEmailIsConfirmed(true);
+        userRepository.save(user);
+    }
+
+    @Override
     public User identicateAndAuthenticate(String email, String password) {
         User user = getUserByEmail(email);
         if (user.getPassword().equals(password)){

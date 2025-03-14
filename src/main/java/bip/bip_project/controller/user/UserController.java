@@ -1,5 +1,6 @@
 package bip.bip_project.controller.user;
 
+import bip.bip_project.model.authenticate.AuthResponse;
 import bip.bip_project.model.authenticate.AuthenticationRequest;
 import bip.bip_project.model.authenticate.AuthenticationResponse;
 import bip.bip_project.model.authenticate.Verify2faRequest;
@@ -28,8 +29,28 @@ public class UserController {
     }
 
     @PostMapping("/createUser")
-    ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto){
-        return ResponseEntity.ok(userService.createUser(userDto));
+    ResponseEntity<?> createUser(@RequestBody UserDto userDto){
+        userService.createUser(userDto);
+
+        String code = twoFactorAuthService.generateCode();
+        twoFactorAuthService.sendCode(userDto.getEmail(), code);
+        twoFactorAuthService.storeCode(userDto.getEmail(), code);
+
+        return ResponseEntity.ok(new AuthResponse("2FA code sent to your email for confirm your email"));
+        //return ResponseEntity.ok(userService.createUser(userDto));
+    }
+
+    @PostMapping("/createUser/register-verify-email")
+    public ResponseEntity<?> createUserVerify2fa(@RequestBody Verify2faRequest verify2faRequest) {
+        String email = verify2faRequest.getEmail();
+        String code = verify2faRequest.getCode();
+
+        if (twoFactorAuthService.verifyCode(email, code)) {
+            userService.confirmEmail(email);
+            return ResponseEntity.ok(userService.getUserByEmail(email));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid 2FA code");
+        }
     }
 
     @PutMapping("/")
@@ -59,10 +80,10 @@ public class UserController {
         twoFactorAuthService.sendCode(user.getEmail(), code);
         twoFactorAuthService.storeCode(user.getEmail(), code);
 
-        return ResponseEntity.ok(new AuthenticationResponse("2FA code sent to your email"));
+        return ResponseEntity.ok(new AuthResponse("2FA code sent to your email"));
     }
 
-    @PostMapping("/verify-2fa")
+    @PostMapping("/authenticate/auth-verify-2fa")
     public ResponseEntity<?> verify2fa(@RequestBody Verify2faRequest verify2faRequest) {
         String email = verify2faRequest.getEmail();
         String code = verify2faRequest.getCode();

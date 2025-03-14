@@ -1,9 +1,6 @@
 package bip.bip_project.model.user;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -23,16 +20,20 @@ public class User {
     String email;
 
     @Column(nullable = false)
+    Boolean emailIsConfirmed = false;
+
+    @Column(nullable = false)
     String role;  // Заменено с List<String> на String
 
     public User() {
     }
 
-    public User(Integer id, String username, String password, String email, String role) {
+    public User(Integer id, String username, String password, String email, Boolean emailIsConfirmed, String role) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
+        this.emailIsConfirmed = emailIsConfirmed;
         this.role = role;
     }
 
@@ -66,6 +67,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Boolean getEmailIsConfirmed() {
+        return emailIsConfirmed;
+    }
+
+    public void setEmailIsConfirmed(Boolean emailIsConfirmed) {
+        this.emailIsConfirmed = emailIsConfirmed;
     }
 
     public String getRole() {
