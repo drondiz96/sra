@@ -21,19 +21,18 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+        with: 
+          fetch-depth: 0  # Загружаем все коммиты и теги
+          
+      - name: Fetch all tags
+        run: git fetch --tags
+        
+      - name: Update version      
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
-
-
-      # 7. Опционально: Вы можете добавить шаг для тестирования, например, если есть тесты, которые нужно выполнить в контейнерах
-      # - name: Run tests
-      #   run: |
-      #     docker-compose exec <service_name> npm test
+          VERSION=$(git describe --tags --abbrev=0)
+          if [ -f .env ]; then
+            NEW_VERSION=$(grep '^VERSION=' .env | cut -d '=' -f 2)
+            git tag $NEW_VERSION
+            git push origin $NEW_VERSION  # Пушим новый тег в репозиторий
+            echo "new version is $NEW_VERSION"
+          fi
