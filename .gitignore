@@ -1,39 +1,49 @@
-HELP.md
-/target/classes
-/target/generated-sources
-/target/generated-test-sources
-/target/maven-archiver
-/target/maven-status
-/target/test-classes
-/target/*.jar.original
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Исключаем файлы сборки Maven
+backend/target/classes
+backend/target/generated-sources
+backend/target/generated-test-sources
+backend/target/maven-archiver
+backend/target/maven-status
+backend/target/test-classes
+backend/target/*.jar.original
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# Исключаем `.mvn/wrapper`, кроме самого JAR-ника
+!backend/.mvn/wrapper/maven-wrapper.jar
+
+# Исключаем `target` внутри `src/main/` и `src/test/`, но оставляем их
+!backend/src/main/**/target/
+!backend/src/test/**/target/
+
+### Spring Tool Suite (STS) ###
+backend/.apt_generated
+backend/.classpath
+backend/.factorypath
+backend/.project
+backend/.settings
+backend/.springBeans
+backend/.sts4-cache
 
 ### IntelliJ IDEA ###
 .idea
+backend/*.iws
+backend/*.iml
+backend/*.ipr
 *.iws
 *.iml
 *.ipr
 
 ### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+backend/nbproject/private/
+backend/nbbuild/
+backend/dist/
+backend/nbdist/
+backend/.nb-gradle/
+
+### Исключаем сборочные файлы ###
+backend/build/
+!backend/src/main/**/build/
+!backend/src/test/**/build/
 
 ### VS Code ###
+backend/.vscode/
 .vscode/
