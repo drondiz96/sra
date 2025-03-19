@@ -11,18 +11,18 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   mail:
-    host: smtp.mail.ru
-    port: 465
-    username: karzhavin.danil@mail.ru
-    password: ${BIP_SMTP_MAIL_PASSWORD}
+    host: smtp.gmail.com
+    port: 587  # Gmail использует 587 для STARTTLS, 465 для SSL
+    username: karzhavin.danil2@gmail.com
+    password:  viqa ritd ddkz rybw # Храним пароль в переменной среды
     properties:
       mail:
         smtp:
           auth: true
           ssl:
-            enable: true  # Включаем SSL
+            enable: false  # SSL отключаем, так как используем STARTTLS
           starttls:
-            enable: false # STARTTLS не нужен, так как используем SSL
+            enable: true  # Для Gmail обязательно включить STARTTLS
 
 
 
