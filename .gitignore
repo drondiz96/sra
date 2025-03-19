@@ -6,6 +6,8 @@ backend/target/maven-archiver
 backend/target/maven-status
 backend/target/test-classes
 backend/target/*.jar.original
+backend/.env
+backend/.
 
 # Исключаем `.mvn/wrapper`, кроме самого JAR-ника
 !backend/.mvn/wrapper/maven-wrapper.jar
@@ -23,11 +25,20 @@ backend/.settings
 backend/.springBeans
 backend/.sts4-cache
 
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
 ### IntelliJ IDEA ###
-.idea
+backend/.idea
 backend/*.iws
 backend/*.iml
 backend/*.ipr
+.idea
 *.iws
 *.iml
 *.ipr
@@ -39,10 +50,20 @@ backend/dist/
 backend/nbdist/
 backend/.nb-gradle/
 
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
 ### Исключаем сборочные файлы ###
 backend/build/
 !backend/src/main/**/build/
 !backend/src/test/**/build/
+
+build/
+!src/main/**/build/
+!src/test/**/build/
 
 ### VS Code ###
 backend/.vscode/
