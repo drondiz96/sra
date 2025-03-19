@@ -13,8 +13,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587  # Gmail использует 587 для STARTTLS, 465 для SSL
-    username: karzhavin.danil2@gmail.com
-    password:  viqa ritd ddkz rybw # Храним пароль в переменной среды
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD} # Храним пароль в переменной среды
     properties:
       mail:
         smtp:
@@ -23,6 +23,14 @@ spring:
             enable: false  # SSL отключаем, так как используем STARTTLS
           starttls:
             enable: true  # Для Gmail обязательно включить STARTTLS
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            scope: profile,email
 
 
 
