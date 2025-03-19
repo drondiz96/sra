@@ -3,7 +3,7 @@ version: '3.8'  # Версия Docker Compose
 services:
   postgresql:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile.postgres  # Обновленное имя файла Dockerfile
     container_name: postgresql  # Имя контейнера
     restart: "no"
@@ -21,7 +21,7 @@ services:
 
   bip_app:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile.app  # Используем Dockerfile.app для сборки
     container_name: bip_app
     restart: "no"
