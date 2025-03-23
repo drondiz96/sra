@@ -44,6 +44,13 @@ public class UserService implements IUserService{
     }
 
     @Override
+    public void setCreateViaGoogle(String email) {
+        User user = getUserByEmail(email);
+        user.setCreatedViaGoogle(Boolean.TRUE);
+        userRepository.save(user);
+    }
+
+    @Override
     public User identicateAndAuthenticate(String email, String password) {
         User user = getUserByEmail(email);
         if (user.getPassword().equals(password)){

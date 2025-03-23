@@ -13,11 +13,14 @@ public class User {
     @Column(nullable = false, unique = true)
     String username;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     String password;
 
     @Column(nullable = false, unique = true)
     String email;
+
+    @Column(nullable = false)
+    Boolean createdViaGoogle = false;
 
     @Column(nullable = false)
     Boolean emailIsConfirmed = false;
@@ -28,11 +31,12 @@ public class User {
     public User() {
     }
 
-    public User(Integer id, String username, String password, String email, Boolean emailIsConfirmed, String role) {
+    public User(Integer id, String username, String password, String email, Boolean createdViaGoogle, Boolean emailIsConfirmed, String role) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
+        this.createdViaGoogle = createdViaGoogle;
         this.emailIsConfirmed = emailIsConfirmed;
         this.role = role;
     }
@@ -83,5 +87,13 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Boolean getCreatedViaGoogle() {
+        return createdViaGoogle;
+    }
+
+    public void setCreatedViaGoogle(Boolean createdViaGoogle) {
+        this.createdViaGoogle = createdViaGoogle;
     }
 }

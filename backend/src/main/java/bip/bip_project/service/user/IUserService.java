@@ -12,6 +12,7 @@ public interface IUserService {
 
     // confirm
     void confirmEmail(String email);
+    void setCreateViaGoogle(String email);
 
     User identicateAndAuthenticate(String email, String password);
 
