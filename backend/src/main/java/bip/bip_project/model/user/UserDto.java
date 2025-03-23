@@ -12,6 +12,13 @@ public class UserDto {
 
     public UserDto(){}
 
+    public UserDto(String username, String role, String password, String email) {
+        this.username = username;
+        this.role = role;
+        this.password = password;
+        this.email = email;
+    }
+
     public UserDto(Integer id, String username, String role, String password, String email) {
         this.id = id;
         this.username = username;

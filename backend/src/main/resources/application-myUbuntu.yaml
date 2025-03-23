@@ -28,9 +28,18 @@ spring:
       client:
         registration:
           google:
-            client-id: ${CLIENT_ID}
+            client-id: 461804719965-roubsl8r43ob7atq19p6ut4v1upg2mrj.apps.googleusercontent.com
             client-secret: ${CLIENT_SECRET}
-            scope: profile,email
+            redirect-uri: "http://localhost:8080/login/oauth2/code/google"
+            scope:
+              - profile
+              - email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth # URL, на который перенаправляется пользователь для входа через Google
+            token-uri: https://oauth2.googleapis.com/token # URL, куда Spring отправит авторизационный код, полученный от Google (В ответ Spring получит access token, refresh token), Это происходит автоматически внутри Spring Security
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo # URL, по которому Spring запрашивает профиль пользователя у Google, В ответ Google вернёт JSON
+            user-name-attribute: email # поле из JSON-а пользователя, которое будет использоваться как основной идентификатор (username).
 
 
 
