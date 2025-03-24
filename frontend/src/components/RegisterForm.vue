@@ -72,15 +72,17 @@
           }
   
           // Отправка данных на бэкенд
-          const response = await fetch("https://your-backend-api.com/register", {
+          const response = await fetch("http://localhost:8080/users/createUser", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "User-Agent": "PostmanRuntime/7.43.2",
             },
             body: JSON.stringify({
               username: this.username,
-              email: this.email,
+              role: "ROLE_USER",
               password: this.password,
+              email: this.email,
             }),
           });
   
