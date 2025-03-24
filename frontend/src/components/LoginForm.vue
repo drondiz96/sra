@@ -45,13 +45,13 @@ export default {
     async handleSubmit() {
       try {
         // Отправка данных на бэкенд
-        const response = await fetch("https://your-backend-api.com/login", {
+        const response = await fetch("http://localhost:8080/users/authenticate", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            username: this.username,
+            email: this.username,
             password: this.password,
           }),
         });
