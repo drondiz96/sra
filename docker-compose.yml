@@ -33,12 +33,12 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/bip
       SPRING_DATASOURCE_USERNAME: develop
       SPRING_DATASOURCE_PASSWORD: develop
-      
+
   frontend:
     build:
       context: ./frontend
     ports:
-      - "8080:80"
+      - "8090:80"
     container_name: front
     restart: unless-stopped
 
