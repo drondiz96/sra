@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -31,27 +32,52 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
+        String jwt = null;
+        String email = null;
+        String role = null;
+
+        // 1. Пытаемся достать из заголовка Authorization
         final String authorizationHeader = request.getHeader("Authorization");
-
-        String email = null, jwt = null, role = null;
-
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
-            email = jwtUtil.extractEmail(jwt);
-            role = jwtUtil.extractRole(jwt);
         }
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            User user = userService.getUserByEmail(email);
-
-            if (jwtUtil.validateToken(jwt, user)) {
-                List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(user, null, authorities);
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+        // 2. Если не было в заголовке — ищем в cookie
+        if (jwt == null) {
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("jwt".equals(cookie.getName())) {
+                        jwt = cookie.getValue();
+                        break;
+                    }
+                }
             }
         }
+
+        // 3. Обрабатываем, если токен нашли
+        if (jwt != null) {
+            try {
+                email = jwtUtil.extractEmail(jwt);
+                role = jwtUtil.extractRole(jwt);
+
+                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    User user = userService.getUserByEmail(email);
+
+                    if (jwtUtil.validateToken(jwt, user)) {
+                        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(user, null, authorities);
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
+                }
+            } catch (Exception e) {
+                // Надо добавить логирование, когда-то возможно это будет реализовано, но это не точно
+            }
+        }
+
         filterChain.doFilter(request, response);
     }
 }
