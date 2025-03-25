@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @RestController
@@ -84,14 +86,27 @@ public class UserController {
     }
 
     @PostMapping("/authenticate/auth-verify-2fa")
-    public ResponseEntity<?> verify2fa(@RequestBody Verify2faRequest verify2faRequest) {
+    public ResponseEntity<?> verify2fa(@RequestBody Verify2faRequest verify2faRequest, HttpServletResponse response) {
         String email = verify2faRequest.getEmail();
         String code = verify2faRequest.getCode();
 
         if (twoFactorAuthService.verifyCode(email, code)) {
             User user = userService.getUserByEmail(email);
             final String jwt = jwtUtil.generateToken(user);
-            return ResponseEntity.ok(new AuthenticationResponse(jwt));
+
+            // Установка JWT в HttpOnly cookie
+            Cookie cookie = new Cookie("jwt", jwt);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(false); // true надо поставить для prod
+            cookie.setPath("/");
+            cookie.setMaxAge(60 * 60 * 2); // на 2 часика
+            response.addCookie(cookie);
+
+            // это старая версия в которой токен передавался в теле http ответа, и вручную на фронте нужно было его сохранять и постоянно пробрасывать при каждом запросе к бекенду
+            // return ResponseEntity.ok(new AuthenticationResponse(jwt));
+
+            // это реализация через cookie, браузер самостоятельно увидит что в этом ответе есть cookie и сохранит jwt в свои cookie и будет всегда автоматически прикреплять его при обращении к бекенду
+            return ResponseEntity.ok("2FA verification success");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid 2FA code");
         }
