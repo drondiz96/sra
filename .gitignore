@@ -68,3 +68,9 @@ build/
 ### VS Code ###
 backend/.vscode/
 .vscode/
+
+### front ###
+frontend/node_modules/
+frontend/public/
+*.log
+*.tmp
