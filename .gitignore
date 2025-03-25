@@ -1,23 +1,76 @@
-.DS_Store
-node_modules
-/dist
+# Исключаем файлы сборки Maven
+backend/target/classes
+backend/target/generated-sources
+backend/target/generated-test-sources
+backend/target/maven-archiver
+backend/target/maven-status
+backend/target/test-classes
+backend/target/*.jar.original
+backend/.env
+backend/.
 
+# Исключаем `.mvn/wrapper`, кроме самого JAR-ника
+!backend/.mvn/wrapper/maven-wrapper.jar
 
-# local env files
-.env.local
-.env.*.local
+# Исключаем `target` внутри `src/main/` и `src/test/`, но оставляем их
+!backend/src/main/**/target/
+!backend/src/test/**/target/
 
-# Log files
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+### Spring Tool Suite (STS) ###
+backend/.apt_generated
+backend/.classpath
+backend/.factorypath
+backend/.project
+backend/.settings
+backend/.springBeans
+backend/.sts4-cache
 
-# Editor directories and files
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+backend/.idea
+backend/*.iws
+backend/*.iml
+backend/*.ipr
 .idea
-.vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+backend/nbproject/private/
+backend/nbbuild/
+backend/dist/
+backend/nbdist/
+backend/.nb-gradle/
+
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+### Исключаем сборочные файлы ###
+backend/build/
+!backend/src/main/**/build/
+!backend/src/test/**/build/
+
+build/
+!src/main/**/build/
+!src/test/**/build/
+
+### VS Code ###
+backend/.vscode/
+.vscode/
+
+### front ###
+frontend/node_modules/
+frontend/public/
+*.log
+*.tmp

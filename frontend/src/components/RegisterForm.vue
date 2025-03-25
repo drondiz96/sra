@@ -75,8 +75,8 @@
           const response = await fetch("http://localhost:8080/users/createUser", {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
-              "User-Agent": "PostmanRuntime/7.43.2",
+              "Content-Type": "application/json"
+            //  "User-Agent": "PostmanRuntime/7.43.2",
             },
             body: JSON.stringify({
               username: this.username,
@@ -94,7 +94,10 @@
           console.log("Успешная регистрация:", data);
   
           // Перенаправление на страницу входа
-          this.$router.push("/login");
+          this.$router.push({
+            path: '/mailverify',
+            query: { email: this.email }
+          });
         } catch (error) {
           this.error = error.message;
           console.error("Ошибка:", error);

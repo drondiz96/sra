@@ -1,0 +1,62 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bip
+    username: develop
+    password: develop
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: smtp.gmail.com
+    port: 587  # Gmail использует 587 для STARTTLS, 465 для SSL
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD} # Храним пароль в переменной среды
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: false  # SSL отключаем, так как используем STARTTLS
+          starttls:
+            enable: true  # Для Gmail обязательно включить STARTTLS
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 461804719965-roubsl8r43ob7atq19p6ut4v1upg2mrj.apps.googleusercontent.com
+            client-secret: ${CLIENT_SECRET}
+            redirect-uri: "http://localhost:8080/login/oauth2/code/google"
+            scope:
+              - profile
+              - email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth # URL, на который перенаправляется пользователь для входа через Google
+            token-uri: https://oauth2.googleapis.com/token # URL, куда Spring отправит авторизационный код, полученный от Google (В ответ Spring получит access token, refresh token), Это происходит автоматически внутри Spring Security
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo # URL, по которому Spring запрашивает профиль пользователя у Google, В ответ Google вернёт JSON
+            user-name-attribute: email # поле из JSON-а пользователя, которое будет использоваться как основной идентификатор (username).
+
+
+
+
+server:
+  address: localhost
+  port: 8080
+
+management:
+  server:
+    port: 8081 # Actuator работает на отдельном порту
+  security:
+    enabled: false  # Если нужно отключить безопасность для актюаторов
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # Разрешить доступ ко всем эндпоинтам
+  endpoint:
+    mappings:
+      enabled: true  # Включить эндпоинт mappings, который показывает все доступные маршруты
