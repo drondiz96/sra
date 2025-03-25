@@ -64,7 +64,10 @@ export default {
         console.log("Успешная авторизация:", data);
 
         // Перенаправление на страницу двухфакторной аутентификации
-        this.$router.push("/two-factor");
+        this.$router.push({
+          path:"/two-factor",
+        query: { email: this.username }}
+        );
       } catch (error) {
         this.error = "Неверное имя пользователя или пароль";
         console.error("Ошибка:", error);

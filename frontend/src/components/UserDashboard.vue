@@ -1,107 +1,64 @@
 <template>
-  <div class="two-factor">
-    <h2>Двухфакторная аутентификация</h2>
-    <p>На вашу почту отправлен код подтверждения. Введите его ниже:</p>
-    <form @submit.prevent="handleSubmit">
-      <div class="form-group">
-        <label for="code">Код подтверждения:</label>
-        <input
-          type="text"
-          id="code"
-          v-model="code"
-          required
-          placeholder="Введите код"
-        />
-      </div>
-      <button type="submit">Подтвердить</button>
-    </form>
-    <p v-if="error" class="error">{{ error }}</p>
+  <div class="welcome-screen">
+    <h1>Добро пожаловать!</h1>
+    <button @click="logout" class="logout-btn">Выйти</button>
   </div>
 </template>
 
 <script>
 export default {
-  data() {
-    return {
-      code: "", // Код подтверждения
-      error: "", // Сообщение об ошибке
-    };
-  },
+  name: 'WelcomePage',
   methods: {
-    async handleSubmit() {
-      try {
-        // Отправка кода на бэкенд для проверки
-        const response = await fetch("https://your-backend-api.com/verify-2fa", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            code: this.code,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Неверный код подтверждения");
-        }
-
-        const data = await response.json();
-        console.log("Успешная аутентификация:", data);
-
-        // Сохранение токена (например, в localStorage)
-        localStorage.setItem("token", data.token);
-
-        // Перенаправление на защищенную страницу
-        this.$router.push("/dashboard");
-      } catch (error) {
-        this.error = "Неверный код подтверждения";
-        console.error("Ошибка:", error);
-      }
-    },
-  },
-};
+    logout() {
+      // Удаляем токен аутентификации
+      localStorage.removeItem('token');
+      // Перенаправляем на страницу входа
+      this.$router.push('/login');
+      // Можно добавить сообщение о успешном выходе
+      alert('Вы успешно вышли из системы');
+    }
+  }
+}
 </script>
 
 <style scoped>
-.two-factor {
-  max-width: 300px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.welcome-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f5f5;
+  font-family: Arial, sans-serif;
+  position: relative;
 }
 
-.form-group {
-  margin-bottom: 15px;
+h1 {
+  color: #2c3e50;
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-input {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #426ab9;
+.logout-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 0.5rem 1rem;
+  background-color: #e74c3c;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-button:hover {
-  background-color: #375490;
+.logout-btn:hover {
+  background-color: #c0392b;
 }
 
-.error {
-  color: red;
-  margin-top: 10px;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 </style>
