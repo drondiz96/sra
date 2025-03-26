@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import LoginForm from "@/components/LoginForm.vue";
-import RegisterForm from "@/components/RegisterForm.vue"; // Импортируйте новый компонент
+import RegisterForm from "@/components/RegisterForm.vue";
+import MailVerify from "@/components/MailVerify.vue";
+
 import TwoFactor from "@/components/TwoFactor.vue";
 import Dashboard from "@/components/UserDashboard.vue";
 
@@ -18,8 +20,13 @@ const routes = [
     component: RegisterForm,
   },
   {
+    path: "/mailverify",
+    component: MailVerify,
+    props: (route) => ({ email: route.query.email })
+  },
+  {
     path: "/two-factor",
-    component: TwoFactor,
+    component: TwoFactor
   },
   {
     path: "/dashboard",
@@ -35,12 +42,16 @@ const router = createRouter({
 
 // Навигационный хук для проверки авторизации
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem("token"); // Проверяем наличие токена
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next("/login"); // Перенаправляем на страницу входа
-  } else {
-    next(); // Продолжаем навигацию
+  const protectedPages = ['/dashboard', '/profile', '/settings']; // Список защищённых страниц
+  const token = localStorage.getItem('token');
+  
+  // Если запрашивается защищённая страница и нет токена
+  if (protectedPages.includes(to.path) && !token) {
+    return next('/login'); // Перенаправляем на страницу входа
   }
+  
+  // Разрешаем переход для всех остальных случаев
+  next();
 });
 
 export default router;
