@@ -54,6 +54,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         response.addCookie(cookie);
 
         // Редирект на фронт
-        response.sendRedirect("http://localhost:3000/welcome");
+        response.sendRedirect("http://localhost:8080/swagger-ui/index.html");
     }
 }
