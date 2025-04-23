@@ -11,7 +11,7 @@ export default {
   methods: {
     logout() {
       // Удаляем токен аутентификации
-      localStorage.removeItem('token');
+      document.cookie = "jwt=; path=/; max-age=0; samesite=lax";
       // Перенаправляем на страницу входа
       this.$router.push('/login');
       // Можно добавить сообщение о успешном выходе
