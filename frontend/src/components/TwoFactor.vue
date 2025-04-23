@@ -64,11 +64,12 @@ export default {
         }
 
         const response = await fetch(
-          "http://localhost:8080/users/authenticate/auth-verify-2fa", 
+          "http://192.168.0.105:8080/users/authenticate/auth-verify-2fa", 
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: this.email, code: this.code }),
+            credentials: "include",
           }
         );
 
@@ -78,12 +79,8 @@ export default {
           throw new Error(data.message || "Неверный код подтверждения");
         }
 
-        if (data.jwt) {
-          document.cookie = `jwt=${data.jwt}; path=/; max-age=604800; samesite=lax`;
-          this.$router.push("/dashboard");
-        } else {
-          throw new Error("Токен не получен в ответе сервера");
-        }
+
+        this.$router.push("/dashboard");
         
       } catch (error) {
         this.error = error.message;

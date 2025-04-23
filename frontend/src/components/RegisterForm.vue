@@ -72,7 +72,7 @@
           }
   
           // Отправка данных на бэкенд
-          const response = await fetch("http://localhost:8080/users/createUser", {
+          const response = await fetch("http://192.168.0.105:8080/users/createUser", {
             method: "POST",
             headers: {
               "Content-Type": "application/json"

@@ -45,7 +45,7 @@ export default {
     async handleSubmit() {
       try {
         // Отправка данных на бэкенд
-        const response = await fetch("http://localhost:8080/users/authenticate", {
+        const response = await fetch("http://192.168.0.105:8080/users/authenticate", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
