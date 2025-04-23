@@ -69,11 +69,11 @@ export default {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: this.email, code: this.code }),
-            credentials: "include",
+            credentials: "include", // Важно: для отправки/получения cookies
           }
         );
 
-        const data = await response.json();
+        const data = await response.text();
         
         if (!response.ok) {
           throw new Error(data.message || "Неверный код подтверждения");
