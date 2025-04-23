@@ -4,13 +4,11 @@ import bip.bip_project.exception.user.UserDtoException;
 import bip.bip_project.exception.user.UserNotFoundException;
 import bip.bip_project.model.user.User;
 import bip.bip_project.model.user.UserDto;
-import bip.bip_project.repository.IUserRepository;
+import bip.bip_project.repository.user.IUserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 

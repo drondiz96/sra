@@ -1,6 +1,12 @@
 package bip.bip_project.model.user;
 
+import bip.bip_project.model.device.Device;
+import bip.bip_project.model.review.Review;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -27,6 +33,10 @@ public class User {
 
     @Column(nullable = false)
     String role;  // Заменено с List<String> на String
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("user-reviews")
+    List<Review> reviews = new ArrayList<>();
 
     public User() {
     }
