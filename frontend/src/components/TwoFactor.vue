@@ -79,7 +79,7 @@ export default {
         }
 
         if (data.jwt) {
-          localStorage.setItem("token", data.jwt);
+          document.cookie = `jwt=${data.jwt}; path=/; max-age=604800; samesite=lax`;
           this.$router.push("/dashboard");
         } else {
           throw new Error("Токен не получен в ответе сервера");
