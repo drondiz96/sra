@@ -68,7 +68,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     if (jwtUtil.validateToken(jwt, user)) {
                         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
                         UsernamePasswordAuthenticationToken authentication =
-                                new UsernamePasswordAuthenticationToken(user, null, authorities);
+                                new UsernamePasswordAuthenticationToken(email, null, authorities); // изменил с usr на email для более простого доступа к юзеру из контроллера
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
