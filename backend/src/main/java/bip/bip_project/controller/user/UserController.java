@@ -2,10 +2,9 @@ package bip.bip_project.controller.user;
 
 import bip.bip_project.model.authenticate.AuthResponse;
 import bip.bip_project.model.authenticate.AuthenticationRequest;
-import bip.bip_project.model.authenticate.AuthenticationResponse;
 import bip.bip_project.model.authenticate.Verify2faRequest;
 import bip.bip_project.model.user.User;
-import bip.bip_project.model.user.UserDto;
+import bip.bip_project.model.user.UserRequestDto;
 import bip.bip_project.security.JwtUtil;
 import bip.bip_project.service.user.IUserService;
 import bip.bip_project.service.user.TwoFactorAuthService;
@@ -39,12 +38,12 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Ошибка при создании пользователя")
     })
     @PostMapping("/createUser")
-    ResponseEntity<?> createUser(@RequestBody UserDto userDto){
-        userService.createUser(userDto);
+    ResponseEntity<?> createUser(@RequestBody UserRequestDto userRequestDto){
+        userService.createUser(userRequestDto);
 
         String code = twoFactorAuthService.generateCode();
-        twoFactorAuthService.sendCode(userDto.getEmail(), code);
-        twoFactorAuthService.storeCode(userDto.getEmail(), code);
+        twoFactorAuthService.sendCode(userRequestDto.getEmail(), code);
+        twoFactorAuthService.storeCode(userRequestDto.getEmail(), code);
 
         return ResponseEntity.ok(new AuthResponse("2FA code sent to your email for confirm your email"));
         //return ResponseEntity.ok(userService.createUser(userDto));
@@ -72,8 +71,8 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Пользователь не найден")
     })
     @PutMapping("/")
-    ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto){
-        return ResponseEntity.ok(userService.updateUser(userDto));
+    ResponseEntity<UserRequestDto> updateUser(@RequestBody UserRequestDto userRequestDto){
+        return ResponseEntity.ok(userService.updateUser(userRequestDto));
     }
 
     @Operation(summary = "Получить пользователя по ID", responses = {
@@ -81,7 +80,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Пользователь не найден")
     })
     @GetMapping("/{id}")
-    ResponseEntity<UserDto> getUserDtoById(@PathVariable("id") Integer id){
+    ResponseEntity<UserRequestDto> getUserDtoById(@PathVariable("id") Integer id){
         return ResponseEntity.ok(userService.getUserDtoById(id));
     }
 
@@ -90,7 +89,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Пользователь не найден")
     })
     @PostMapping("/byEmail/")
-    ResponseEntity<UserDto> getUserDtoByEmail(@RequestBody Map<String, Object> data) {
+    ResponseEntity<UserRequestDto> getUserDtoByEmail(@RequestBody Map<String, Object> data) {
         return ResponseEntity.ok(userService.getUserDtoByEmail(data));
     }
 

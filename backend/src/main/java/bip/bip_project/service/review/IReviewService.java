@@ -1,7 +1,9 @@
 package bip.bip_project.service.review;
 
-import bip.bip_project.model.review.ReviewDto;
-import org.springframework.stereotype.Service;
+import bip.bip_project.model.device.FilterType;
+import bip.bip_project.model.review.Review;
+import bip.bip_project.model.review.ReviewRequestDto;
+import bip.bip_project.model.review.ReviewResponseDto;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,22 +11,17 @@ import java.util.Map;
 
 
 public interface IReviewService {
-    List<ReviewDto> getReviews(Map<String, LocalDate> dates);
-    List<ReviewDto> getReviewsByTags(List<String> tags);
+    List<Review> getReviews(Map<String, LocalDate> dates);
 
-    ReviewDto getReviewById(Integer reviewId);
+    boolean existsById(Integer reviewId);
+    Review getReviewById(Integer reviewId);
+    ReviewResponseDto getReviewResponseDtoById(Integer reviewId);
 
-    List<ReviewDto> getReviewsByDeviceType(String deviceType);
+    List<ReviewResponseDto> getReviewsByFilter(FilterType filterType, String value);
 
-    List<ReviewDto> getReviewsByDeviceModel(String deviceModel);
+    ReviewResponseDto createReview(String email, ReviewRequestDto reviewRequestDto);
+    ReviewResponseDto updateReview(String email, ReviewRequestDto reviewRequestDto);
 
-    List<ReviewDto> getReviewsByManufacturer(String manufacturer);
-
-    List<ReviewDto> getReviewsByAuthorEmail(String email);
-    List<ReviewDto> getReviewByAuthorId(Integer authorId);
-
-    ReviewDto updateReview(ReviewDto reviewDto);
-
-    void deleteReviewById(Integer reviewId);
+    void deleteReviewById(String email, Integer reviewId);
 
 }

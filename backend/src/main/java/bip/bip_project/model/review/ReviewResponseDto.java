@@ -4,9 +4,8 @@ import bip.bip_project.model.device.Device;
 import bip.bip_project.model.user.User;
 
 import java.util.Date;
-import java.util.List;
 
-public class ReviewDto {
+public class ReviewResponseDto {
     public Integer id;
 
     public String title;
@@ -21,13 +20,9 @@ public class ReviewDto {
 
     private User author;
 
-    private List<String> tags;
+    public ReviewResponseDto(){}
 
-    List<Rating> ratings;
-
-    public ReviewDto(){}
-
-    public ReviewDto(Integer id, String title, String content, Date dateOfCreation, Date dateOfChanged, Device device, User author, List<String> tags, List<Rating> ratings) {
+    public ReviewResponseDto(Integer id, String title, String content, Date dateOfCreation, Date dateOfChanged, Device device, User author) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -35,8 +30,6 @@ public class ReviewDto {
         this.dateOfChanged = dateOfChanged;
         this.device = device;
         this.author = author;
-        this.tags = tags;
-        this.ratings = ratings;
     }
 
     public Integer getId() {
@@ -93,21 +86,5 @@ public class ReviewDto {
 
     public void setAuthor(User author) {
         this.author = author;
-    }
-
-    public List<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
-    public List<Rating> getRatings() {
-        return ratings;
-    }
-
-    public void setRatings(List<Rating> ratings) {
-        this.ratings = ratings;
     }
 }

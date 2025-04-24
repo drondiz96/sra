@@ -1,25 +1,16 @@
 package bip.bip_project.model.user;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class UserDto {
+public class UserResponseDto {
     Integer id;
     String username;
     String role;
     String password;
     String email;
 
-    public UserDto(){}
-
-    public UserDto(String username, String role, String password, String email) {
-        this.username = username;
-        this.role = role;
-        this.password = password;
-        this.email = email;
+    public UserResponseDto() {
     }
 
-    public UserDto(Integer id, String username, String role, String password, String email) {
+    public UserResponseDto(Integer id, String username, String role, String password, String email) {
         this.id = id;
         this.username = username;
         this.role = role;

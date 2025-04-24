@@ -3,7 +3,7 @@ package bip.bip_project.service.user;
 import bip.bip_project.exception.user.UserDtoException;
 import bip.bip_project.exception.user.UserNotFoundException;
 import bip.bip_project.model.user.User;
-import bip.bip_project.model.user.UserDto;
+import bip.bip_project.model.user.UserRequestDto;
 import bip.bip_project.repository.user.IUserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.annotation.Secured;
@@ -21,9 +21,9 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public UserDto createUser(UserDto userDto) {
+    public UserRequestDto createUser(UserRequestDto userRequestDto) {
         User user = new User();
-        BeanUtils.copyProperties(userDto, user, new String[] {"id"});
+        BeanUtils.copyProperties(userRequestDto, user, new String[] {"id"});
         userRepository.save(user);
         return getUserDtoById(user.getId());
     }
@@ -75,29 +75,31 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public UserDto getUserDtoById(Integer id) {
+    public UserRequestDto getUserDtoById(Integer id) {
         User user = getUserById(id);
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(user, userDto);
-        return userDto;
+        UserRequestDto userRequestDto = new UserRequestDto();
+        BeanUtils.copyProperties(user, userRequestDto);
+        return userRequestDto;
     }
 
     @Override
-    public UserDto getUserDtoByEmail(Map<String, Object> data) {
+    public UserRequestDto getUserDtoByEmail(Map<String, Object> data) {
         String email = data.get("email").toString();
-        return userRepository.findUserDtoByEmail(email);
+        //return userRepository.findUserDtoByEmail(email);
+        return null;
     }
 
     @Override
     @Secured({"ROLE_USER", "ROLE_ADMIN"})
-    public UserDto updateUser(UserDto userDto) {
-        if (userDto.getId() == null) {
-            throw new UserDtoException("Field 'id' is null");
-        }
-        User user = getUserById(userDto.getId());
-        BeanUtils.copyProperties(userDto, user, new String[] {"id"});
-        userRepository.save(user);
-        return getUserDtoById(user.getId());
+    public UserRequestDto updateUser(UserRequestDto userRequestDto) {
+//        if (userRequestDto.getId() == null) {
+//            throw new UserDtoException("Field 'id' is null");
+//        }
+//        User user = getUserById(userRequestDto.getId());
+//        BeanUtils.copyProperties(userRequestDto, user, new String[] {"id"});
+//        userRepository.save(user);
+//        return getUserDtoById(user.getId());
+        return null;
     }
 
     @Override

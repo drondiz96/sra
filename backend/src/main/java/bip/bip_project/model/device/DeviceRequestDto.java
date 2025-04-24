@@ -1,37 +1,27 @@
 package bip.bip_project.model.device;
 
+import java.time.LocalDate;
 import java.util.Date;
 
-public class DeviceDto {
-    private Integer id;
-
+public class DeviceRequestDto {
     private String deviceType;
 
     private String model;
 
     private String manufacturer;
 
-    private Date dateOfCreation;
+    private LocalDate dateOfCreation;
 
     private String imageUrl;
 
-    public DeviceDto(){}
+    public DeviceRequestDto(){}
 
-    public DeviceDto(Integer id, String deviceType, String model, String manufacturer, Date dateOfCreation, String imageUrl) {
-        this.id = id;
+    public DeviceRequestDto(String deviceType, String model, String manufacturer, LocalDate dateOfCreation, String imageUrl) {
         this.deviceType = deviceType;
         this.model = model;
         this.manufacturer = manufacturer;
         this.dateOfCreation = dateOfCreation;
         this.imageUrl = imageUrl;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getDeviceType() {
@@ -66,11 +56,11 @@ public class DeviceDto {
         this.imageUrl = imageUrl;
     }
 
-    public Date getDateOfCreation() {
+    public LocalDate getDateOfCreation() {
         return dateOfCreation;
     }
 
-    public void setDateOfCreation(Date dateOfCreation) {
+    public void setDateOfCreation(LocalDate dateOfCreation) {
         this.dateOfCreation = dateOfCreation;
     }
 }
