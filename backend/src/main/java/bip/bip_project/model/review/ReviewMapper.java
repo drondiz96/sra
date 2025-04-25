@@ -5,11 +5,12 @@ import bip.bip_project.model.device.DeviceMapper;
 import bip.bip_project.model.device.DeviceRequestDto;
 import bip.bip_project.model.device.DeviceResponseDto;
 import bip.bip_project.model.user.User;
+import bip.bip_project.model.user.UserMapper;
 import bip.bip_project.model.user.UserRequestDto;
 import bip.bip_project.model.user.UserResponseDto;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring", uses = DeviceMapper.class)
+@Mapper(componentModel = "spring", uses = {DeviceMapper.class, UserMapper.class})
 public interface ReviewMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -19,6 +20,7 @@ public interface ReviewMapper {
     Review toEntity(ReviewRequestDto reviewRequestDto);
 
     @Mapping(source = "device", target = "device")
+    @Mapping(source = "author", target = "author")
     ReviewResponseDto toDto(Review review);
 
 //    Device toEntity(DeviceRequestDto deviceRequestDto);

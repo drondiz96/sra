@@ -9,18 +9,16 @@ public class CommentResponseDto {
     private String content;
     private Date dateOfCreation;
     private Date dateOfChanged;
-    private Integer reviewId;
     private UserResponseDto author;
 
     public CommentResponseDto() {
     }
 
-    public CommentResponseDto(Integer id, String content, Date dateOfCreation, Date dateOfChanged, Integer reviewId, UserResponseDto author) {
+    public CommentResponseDto(Integer id, String content, Date dateOfCreation, Date dateOfChanged, UserResponseDto author) {
         this.id = id;
         this.content = content;
         this.dateOfCreation = dateOfCreation;
         this.dateOfChanged = dateOfChanged;
-        this.reviewId = reviewId;
         this.author = author;
     }
 
@@ -54,14 +52,6 @@ public class CommentResponseDto {
 
     public void setDateOfChanged(Date dateOfChanged) {
         this.dateOfChanged = dateOfChanged;
-    }
-
-    public Integer getReviewId() {
-        return reviewId;
-    }
-
-    public void setReviewId(Integer reviewId) {
-        this.reviewId = reviewId;
     }
 
     public UserResponseDto getAuthor() {

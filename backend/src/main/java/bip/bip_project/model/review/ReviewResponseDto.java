@@ -2,6 +2,7 @@ package bip.bip_project.model.review;
 
 import bip.bip_project.model.device.Device;
 import bip.bip_project.model.user.User;
+import bip.bip_project.model.user.UserResponseDto;
 
 import java.util.Date;
 
@@ -18,11 +19,11 @@ public class ReviewResponseDto {
 
     private Device device;
 
-    private User author;
+    private UserResponseDto author;
 
     public ReviewResponseDto(){}
 
-    public ReviewResponseDto(Integer id, String title, String content, Date dateOfCreation, Date dateOfChanged, Device device, User author) {
+    public ReviewResponseDto(Integer id, String title, String content, Date dateOfCreation, Date dateOfChanged, Device device, UserResponseDto author) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -80,11 +81,11 @@ public class ReviewResponseDto {
         this.device = device;
     }
 
-    public User getAuthor() {
+    public UserResponseDto getAuthor() {
         return author;
     }
 
-    public void setAuthor(User author) {
+    public void setAuthor(UserResponseDto author) {
         this.author = author;
     }
 }

@@ -15,6 +15,5 @@ public interface CommentMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "review", ignore = true)
     void updateCommentFromDto(CommentRequestDto dto, @MappingTarget Comment comment);
 }

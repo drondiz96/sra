@@ -3,15 +3,13 @@ package bip.bip_project.model.comment;
 public class CommentRequestDto {
     private Integer id;
     private String content;
-    private Integer reviewId;
 
     public CommentRequestDto() {
     }
 
-    public CommentRequestDto(Integer id, String content, Integer reviewId) {
+    public CommentRequestDto(Integer id, String content) {
         this.id = id;
         this.content = content;
-        this.reviewId = reviewId;
     }
 
     public Integer getId() {
@@ -28,13 +26,5 @@ public class CommentRequestDto {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public Integer getReviewId() {
-        return reviewId;
-    }
-
-    public void setReviewId(Integer reviewId) {
-        this.reviewId = reviewId;
     }
 }
