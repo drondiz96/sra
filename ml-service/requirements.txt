@@ -1,0 +1,14 @@
+# requirements.txt
+fastapi==0.110.*            # веб-фреймворк
+uvicorn[standard]==0.29.*   # ASGI-сервер
+aiohttp                     # асинхронные HTTP-клиент/сервер
+backoff                     # удобные ретраи
+diskcache                   # кэш для html и ссылок
+readability-lxml            # извлечение основного текста из статей
+beautifulsoup4              # парсинг HTML
+googlesearch-python         # Google search API
+openai                      # клиент OpenAI-совместимых LLM
+pydantic>=2,<3              # модели данных
+langdetect                  # авто-определение языка
+youtube-transcript-api      # субтитры YouTube (если нужна поддержка видео)
+lxml_html_clean 
