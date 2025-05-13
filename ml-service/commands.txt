@@ -1,0 +1,2 @@
+docker logs -f reviews-api - Проверить логи контейнера
+docker stop reviews-api - остановка

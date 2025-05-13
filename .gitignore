@@ -74,3 +74,9 @@ frontend/node_modules/
 frontend/public/
 *.log
 *.tmp
+ml-service/.idea/
+ml-service/.reviews_cache/
+ml-service/.vscode/
+ml-service/__pycache__/
+ml-service/.env
+.vscode/

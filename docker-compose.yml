@@ -41,6 +41,17 @@ services:
       - "8090:80"
     container_name: front
     restart: unless-stopped
-
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PIP_NO_CACHE_DIR=on
+      
 volumes:
   postgres_data:  # Определяем том для хранения данных
+
+
