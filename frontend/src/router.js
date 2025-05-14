@@ -6,10 +6,12 @@ import MailVerify from "@/components/MailVerify.vue";
 import TwoFactor from "@/components/TwoFactor.vue";
 import Dashboard from "@/components/UserDashboard.vue";
 
+import review from "@/review/MainPage.vue";
+import PhoneDetails from '@/review/PhoneDetails.vue';
 const routes = [
   {
     path: "/",
-    redirect: "/login", // Перенаправление на страницу входа
+    redirect: "/review", // Перенаправление на страницу входа
   },
   {
     path: "/login",
@@ -33,6 +35,22 @@ const routes = [
     component: Dashboard,
     meta: { requiresAuth: true }, // Защищенный маршрут
   },
+  {
+    path: "/review",
+    component: review
+  },
+  {
+    path: '/phones/:id',
+    name: 'PhoneDetails',
+    component: PhoneDetails,
+    props: true
+  },
+  {
+    path: '/user/:username',
+    name: 'UserProfile',
+    component: () => import('@/views/UserProfile.vue'),
+    props: true
+  }
 ];
 
 const router = createRouter({
