@@ -25,6 +25,7 @@
 <script setup>
 import { defineProps } from 'vue'
 import { useRouter } from 'vue-router'
+import { formatPrice } from '@/review/utils/formatters'
 
 const router = useRouter()
 const props = defineProps({
@@ -41,14 +42,6 @@ const props = defineProps({
     })
   }
 })
-
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'RUB',
-    maximumFractionDigits: 0
-  }).format(price)
-}
 
 const navigateToDetails = () => {
   router.push({ name: 'PhoneDetails', params: { id: props.phone.id } })
