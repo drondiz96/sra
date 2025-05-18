@@ -17,6 +17,8 @@
     <CommentsSection 
       :comments="comments"
       @add-comment="addComment"
+      :showInput="true"
+      title="Отзывы клиентов"
     />
   </div>
 </template>

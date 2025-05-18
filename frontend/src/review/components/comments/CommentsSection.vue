@@ -1,14 +1,14 @@
 <template>
   <div class="comments-section">
-    <h2>Комментарии пользователей ({{ comments?.length || 0 }})</h2>
-    
-    <div class="comment-form">
+    <h2>{{ title }} ({{ comments?.length || 0 }})</h2>
+
+    <div v-if="showInput" class="comment-form">
       <textarea
         v-model="newComment"
         placeholder="Оставьте ваш комментарий..."
         class="comment-input"
       ></textarea>
-      <button 
+      <button
         @click="handleAddComment"
         :disabled="!newComment.trim()"
         class="comment-button"
@@ -18,11 +18,11 @@
     </div>
 
     <div v-if="comments && comments.length" class="comments-list">
-      <CommentItem v-for="comment in comments" 
-      :key="comment.id" 
-      :comment="comment" 
+      <CommentItem
+        v-for="comment in comments"
+        :key="comment.id"
+        :comment="comment"
       />
-
     </div>
 
     <div v-else class="no-comments">
@@ -32,13 +32,21 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref } from 'vue'
-
+import { ref, defineEmits, defineProps } from 'vue'
 import CommentItem from './CommentItem.vue'
+
 defineProps({
   comments: {
     type: Array,
     required: true
+  },
+  title: {
+    type: String,
+    default: 'Комментарии пользователей'
+  },
+  showInput: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -47,9 +55,8 @@ const newComment = ref('')
 
 const handleAddComment = () => {
   if (newComment.value.trim()) {
-    emit('add-comment', newComment.value.trim()) // Явная передача текста
-    newComment.value = '' // Очистка поля ввода
-    console.log('Комментарий отправлен:', newComment.value) // Для отладки
+    emit('add-comment', newComment.value.trim())
+    newComment.value = ''
   }
 }
 </script>
@@ -130,7 +137,6 @@ const handleAddComment = () => {
   font-style: italic;
 }
 
-/* Адаптация для узких экранов */
 @media (max-width: 768px) {
   .comments-section {
     padding: 1rem;
@@ -141,5 +147,4 @@ const handleAddComment = () => {
     align-self: stretch;
   }
 }
-
 </style>
