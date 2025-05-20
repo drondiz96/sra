@@ -64,25 +64,36 @@ export default {
         }
 
         const response = await fetch(
-          "http://localhost:8080/users/authenticate/auth-verify-2fa", 
+          "http://localhost:8080/users/authenticate/auth-verify-2fa",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: this.email, code: this.code }),
+            credentials: 'include' // Важно для получения cookie от сервера
           }
-        );
+        ).catch(() => {
+          throw new Error("Ошибка сети");
+        });
 
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.message || "Неверный код подтверждения");
-        }
+        const resultText = await response.text();
 
-        if (data.jwt) {
-          document.cookie = `jwt=${data.jwt}; path=/; max-age=604800; samesite=lax`;
-          this.$router.push("/dashboard");
+        // Обрабатываем текстовые ответы сервера
+        if (response.ok) {
+          if (resultText === "2FA verification success") {
+            this.$router.push({
+              path: "/reviews/",
+              state: {
+                email: this.email
+              }
+            });
+          } else {
+            throw new Error("Неожиданный ответ сервера");
+          }
         } else {
-          throw new Error("Токен не получен в ответе сервера");
+          if (resultText === "Invalid 2FA code") {
+            throw new Error("Неверный код подтверждения");
+          }
+          throw new Error(resultText || "Ошибка сервера");
         }
         
       } catch (error) {

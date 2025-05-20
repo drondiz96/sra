@@ -90,7 +90,7 @@ export function usePhones() {
     await new Promise(resolve => setTimeout(resolve, 500))
     phones.value = mockResponse
     isLoading.value = false
-    alert('Здесь должно быть получение телефонов(usePhones.js)')
+    //alert('Здесь должно быть получение телефонов(usePhones.js)')
   }
 
   watch(() => route.query, () => {

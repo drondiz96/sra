@@ -7,7 +7,7 @@
 
 <script>
 export default {
-  name: 'WelcomePage',
+  name: 'WelcomePage',  
   methods: {
     logout() {
       // Удаляем токен аутентификации

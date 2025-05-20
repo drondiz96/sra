@@ -22,6 +22,8 @@
         v-for="comment in comments"
         :key="comment.id"
         :comment="comment"
+        @updated="onCommentUpdated"
+        @deleted="onCommentDeleted"
       />
     </div>
 
@@ -32,14 +34,11 @@
 </template>
 
 <script setup>
-import { ref, defineEmits, defineProps } from 'vue'
+import { ref, onMounted, defineProps } from 'vue'
+import { useRoute } from 'vue-router'
 import CommentItem from './CommentItem.vue'
 
 defineProps({
-  comments: {
-    type: Array,
-    required: true
-  },
   title: {
     type: String,
     default: 'Комментарии пользователей'
@@ -50,24 +49,76 @@ defineProps({
   }
 })
 
-const emit = defineEmits(['add-comment'])
+const route = useRoute()
+const comments = ref([])
 const newComment = ref('')
 
-const handleAddComment = () => {
-  if (newComment.value.trim()) {
-    emit('add-comment', newComment.value.trim())
-    newComment.value = ''
+const fetchComments = async () => {
+  try {
+    const response = await fetch(`http://localhost:8080/comments/by-review/${route.params.id}`, {
+      method: 'GET',
+      credentials: 'include'
+    })
+
+    if (!response.ok) throw new Error('Ошибка загрузки комментариев')
+
+    const rawComments = await response.json()
+    comments.value = rawComments.map(c => ({
+      id: c.id,
+      text: c.content,
+      date: new Date(c.dateOfCreation).toLocaleString(),
+      authorName: c.author?.username ?? null
+    }))
+  } catch (error) {
+    console.error('Ошибка при получении комментариев:', error)
   }
 }
+
+const handleAddComment = async () => {
+  if (!newComment.value.trim()) return
+
+  try {
+    const response = await fetch(`http://localhost:8080/comments/${route.params.id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ content: newComment.value.trim() })
+    })
+
+    if (!response.ok) throw new Error('Ошибка при добавлении комментария')
+
+    const newC = await response.json()
+    comments.value.push({
+      id: newC.id,
+      text: newC.content,
+      date: new Date(newC.dateOfCreation).toLocaleString(),
+      authorName: newC.author?.username ?? null
+    })
+
+    newComment.value = ''
+  } catch (error) {
+    console.error('Не удалось добавить комментарий:', error)
+  }
+}
+
+const onCommentUpdated = (updatedComment) => {
+  const index = comments.value.findIndex(c => c.id === updatedComment.id)
+  if (index !== -1) {
+    comments.value[index].text = updatedComment.text
+  }
+}
+
+const onCommentDeleted = (deletedId) => {
+  comments.value = comments.value.filter(c => c.id !== deletedId)
+}
+
+onMounted(fetchComments)
 </script>
 
 <style scoped>
 .comments-section {
   margin-top: 4rem;
   padding: 25px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
   max-width: 100%;
 }
@@ -114,6 +165,10 @@ const handleAddComment = () => {
   transition: background 0.3s;
 }
 
+.comment-button.cancel {
+  background: #aaa;
+}
+
 .comment-button:disabled {
   background: #bdc3c7;
   cursor: not-allowed;
@@ -138,13 +193,8 @@ const handleAddComment = () => {
 }
 
 @media (max-width: 768px) {
-  .comments-section {
-    padding: 1rem;
-  }
-
   .comment-button {
     width: 100%;
-    align-self: stretch;
   }
 }
 </style>

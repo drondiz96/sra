@@ -36,8 +36,13 @@ const routes = [
     meta: { requiresAuth: true }, // Защищенный маршрут
   },
   {
-    path: "/review",
+    path: "/reviews",
     component: review
+  },
+  {
+    path: "/reviews/:id",
+    name: 'ReviewDetail',
+    component: () => import('@/review/ReviewDetail.vue') // путь к компоненту подробностей
   },
   {
     path: '/phones/:id',

@@ -16,31 +16,25 @@
         :user="user"
       />
 
-      <!-- Список телефонов -->
-      <div class="phone-grid">
-        <template v-if="!isLoading">
-          <PhoneCard 
-            v-for="phone in filteredPhones" 
-            :key="phone.id" 
-            :phone="phone"
-          />
-        </template>
-        <div v-else class="loading">Загрузка...</div>
+      <!-- Список обзоров -->
+      <div class="reviews-grid">
+        <ReviewList />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import PhoneCard from '@/review/mainpage/PhoneCard.vue'
 import FiltersPanel from '@/review/mainpage/FiltersPanel.vue'
 import UserProfileCard from '@/review/mainpage/UserPanel.vue'
 import { usePhones } from '@/review/data/usePhones'
+import ReviewList from './ReviewList.vue'
+import defaultAvatar from '@/assets/default-avatar.gif'
 
 // Получаем данные и фильтры
 const {
-  isLoading,
-  filteredPhones,
+  // isLoading,
+  // filteredPhones,
   searchQuery,
   priceRange,
   validatePriceInput,
@@ -50,9 +44,8 @@ const {
 const user = {
   id: 1,
   username: 'Иван Иванов',
-  avatar: 'https://via.placeholder.com/150'
+  avatar: defaultAvatar
 }
-
 </script>
 
 <style scoped>
@@ -70,9 +63,9 @@ const user = {
   position: relative;
 }
 
-.phone-grid {
+.reviews-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: 1fr;
   gap: 25px;
   padding: 15px 0;
 }
@@ -88,12 +81,6 @@ const user = {
   .container {
     grid-template-columns: 1fr;
     padding: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .phone-grid {
-    grid-template-columns: 1fr;
   }
 }
 </style>

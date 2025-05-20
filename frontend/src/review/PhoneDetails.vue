@@ -60,6 +60,41 @@ const phone = ref({
       author: 'Иван Петров',
       rating: 4.5
     },
+        {
+      title: 'Подробный обзор от TechRadar',
+      url: 'https://www.youtube.com/watch?v=uhfAIfySwhw&t=41s',
+      summary: 'Отличный экран и автономность...'.repeat(5),
+      author: 'Иван Петров',
+      rating: 4.5
+    },
+    {
+      title: 'Подробный обзор от TechRadar',
+      url: 'https://www.youtube.com/watch?v=uhfAIfySwhw&t=41s',
+      summary: 'Отличный экран и автономность...'.repeat(5),
+      author: 'Иван Петров',
+      rating: 4.5
+    },
+        {
+      title: 'Подробный обзор от TechRadar',
+      url: 'https://www.youtube.com/watch?v=uhfAIfySwhw&t=41s',
+      summary: 'Отличный экран и автономность...'.repeat(5),
+      author: 'Иван Петров',
+      rating: 4.5
+    },
+    {
+      title: 'Подробный обзор от TechRadar',
+      url: 'https://www.youtube.com/watch?v=uhfAIfySwhw&t=41s',
+      summary: 'Отличный экран и автономность...'.repeat(5),
+      author: 'Иван Петров',
+      rating: 4.5
+    },
+        {
+      title: 'Подробный обзор от TechRadar',
+      url: 'https://www.youtube.com/watch?v=uhfAIfySwhw&t=41s',
+      summary: 'Отличный экран и автономность...'.repeat(5),
+      author: 'Иван Петров',
+      rating: 4.5
+    }
 ]
 })
 
