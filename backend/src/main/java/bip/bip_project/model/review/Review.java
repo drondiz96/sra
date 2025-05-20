@@ -46,6 +46,11 @@ public class Review {
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("review-externalReviews")
+    private List<ExternalReview> externalReviews = new ArrayList<>();
+
+
 //    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private List<Rating> ratings = new ArrayList<>();
 
@@ -124,6 +129,14 @@ public class Review {
 
     public void setComments(List<Comment> comments) {
         this.comments = comments;
+    }
+
+    public List<ExternalReview> getExternalReviews() {
+        return externalReviews;
+    }
+
+    public void setExternalReviews(List<ExternalReview> externalReviews) {
+        this.externalReviews = externalReviews;
     }
 }
 

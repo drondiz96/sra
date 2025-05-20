@@ -11,7 +11,8 @@ import java.util.Map;
 
 
 public interface IReviewService {
-    List<Review> getReviews(Map<String, LocalDate> dates);
+    public List<ReviewResponseDto> getAllReviews();
+    List<ReviewResponseDto> getReviews(Map<String, LocalDate> dates);
 
     boolean existsById(Integer reviewId);
     Review getReviewById(Integer reviewId);

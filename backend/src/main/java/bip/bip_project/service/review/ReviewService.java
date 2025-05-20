@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewService implements IReviewService {
@@ -28,23 +29,38 @@ public class ReviewService implements IReviewService {
     IReviewRepository reviewRepository;
     ReviewMapper reviewMapper;
     DeviceMapper deviceMapper;
+    IExternalReviewService externalReviewService;
 
-    public ReviewService(IUserService userService, IReviewRepository reviewRepository, ReviewMapper reviewMapper, DeviceMapper deviceMapper) {
+    public ReviewService(IUserService userService, IReviewRepository reviewRepository, ReviewMapper reviewMapper, DeviceMapper deviceMapper, IExternalReviewService externalReviewService) {
         this.userService = userService;
         this.reviewRepository = reviewRepository;
         this.reviewMapper = reviewMapper;
         this.deviceMapper = deviceMapper;
+        this.externalReviewService = externalReviewService;
     }
 
     @Override
-    public List<Review> getReviews(Map<String, LocalDate> dates) {
+    public List<ReviewResponseDto> getReviews(Map<String, LocalDate> dates) {
         LocalDate startDate = dates.get("startDate");
         LocalDate endDate = dates.get("endDate");
         if (startDate == null || endDate == null) {
             throw new ReviewException("Field 'startDate' or 'endDate' is null in Map<String, LocalDate> dates");
         }
-        return reviewRepository.findAllBetweenDates(startDate, endDate);
+        List<ReviewResponseDto> reviewResponseDtos = new ArrayList<>();
+        for (Review review : reviewRepository.findAllBetweenDates(startDate, endDate)){
+            reviewResponseDtos.add(reviewMapper.toDto(review));
+        }
+        return reviewResponseDtos;
     }
+
+    @Override
+    public List<ReviewResponseDto> getAllReviews() {
+        List<Review> reviews = reviewRepository.findAll();
+        return reviews.stream()
+                .map(reviewMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     public boolean existsById(Integer reviewId) {
@@ -106,6 +122,9 @@ public class ReviewService implements IReviewService {
             device.setDateOfCreation(LocalDate.now());
         }
         reviewRepository.save(review);
+
+        // Получаем и сохраняем внешние обзоры
+        externalReviewService.fetchAndSaveExternalReviews(review);
 
         return reviewMapper.toDto(review);
     }

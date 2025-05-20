@@ -5,6 +5,7 @@ import bip.bip_project.model.user.User;
 import bip.bip_project.model.user.UserResponseDto;
 
 import java.util.Date;
+import java.util.List;
 
 public class ReviewResponseDto {
     public Integer id;
@@ -20,6 +21,8 @@ public class ReviewResponseDto {
     private Device device;
 
     private UserResponseDto author;
+
+    private List<ExternalReview> externalReviews;
 
     public ReviewResponseDto(){}
 
@@ -87,5 +90,13 @@ public class ReviewResponseDto {
 
     public void setAuthor(UserResponseDto author) {
         this.author = author;
+    }
+
+    public List<ExternalReview> getExternalReviews() {
+        return externalReviews;
+    }
+
+    public void setExternalReviews(List<ExternalReview> externalReviews) {
+        this.externalReviews = externalReviews;
     }
 }

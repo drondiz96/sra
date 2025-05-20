@@ -29,9 +29,15 @@ public class ReviewController {
 
     @Operation(summary = "Получить обзоры по дате", description = "Возвращает список обзоров, созданных в заданном диапазоне дат.")
     @PostMapping("/by-date")
-    public ResponseEntity<List<Review>> getReviewsByDate(
+    public ResponseEntity<List<ReviewResponseDto>> getReviewsByDate(
             @RequestBody Map<String, LocalDate> dates) {
         return ResponseEntity.ok(reviewService.getReviews(dates));
+    }
+
+    @Operation(summary = "Получить все обзоры", description = "Возвращает список всех обзоров")
+    @GetMapping("/all")
+    public ResponseEntity<List<ReviewResponseDto>> getAllReviews() {
+        return ResponseEntity.ok(reviewService.getAllReviews());
     }
 
     @Operation(summary = "Получить обзор по ID", description = "Возвращает обзор по его уникальному идентификатору.")

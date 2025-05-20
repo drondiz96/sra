@@ -21,13 +21,8 @@ public interface ReviewMapper {
 
     @Mapping(source = "device", target = "device")
     @Mapping(source = "author", target = "author")
+    @Mapping(target = "externalReviews", source = "externalReviews")
     ReviewResponseDto toDto(Review review);
-
-//    Device toEntity(DeviceRequestDto deviceRequestDto);
-//    DeviceResponseDto toDto(Device device);
-
-//    User toEntity(UserRequestDto userRequestDto);
-//    UserResponseDto toDto(User user);
 
     // обновление
     // Благодаря BeanMapping, null в reviewRequestDto не перезапишет значение в entity
