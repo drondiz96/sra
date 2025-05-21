@@ -4,3 +4,6 @@ spring:
 
 server:
   address: 0.0.0.0
+
+external-review:
+  base-url: http://ml-service:8000

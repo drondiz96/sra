@@ -3,6 +3,7 @@ package bip.bip_project.service.review;
 import bip.bip_project.model.review.ExternalReview;
 import bip.bip_project.model.review.Review;
 import bip.bip_project.repository.review.IExternalReviewRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -18,6 +19,9 @@ public class ExternalReviewService implements IExternalReviewService {
 
     private final IExternalReviewRepository externalReviewRepository;
     private final RestTemplate restTemplate;
+    @Value("${external-review.base-url}")
+    private String externalReviewBaseUrl;
+
 
     public ExternalReviewService(IExternalReviewRepository externalReviewRepository) {
         this.externalReviewRepository = externalReviewRepository;
@@ -30,7 +34,7 @@ public class ExternalReviewService implements IExternalReviewService {
         String brand = review.getDevice().getManufacturer();
         String model = review.getDevice().getModel();
 
-        String url = UriComponentsBuilder.fromHttpUrl("http://localhost:8000/api/reviews")
+        String url = UriComponentsBuilder.fromHttpUrl(externalReviewBaseUrl + "/api/reviews")
                 .queryParam("brand", brand)
                 .queryParam("model", model)
                 .queryParam("language", "ru")
