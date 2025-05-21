@@ -1,12 +1,12 @@
 <template>
   <div class="reviews-section">
     <div class="reviews-header">
-      <h2>Обзоры</h2>
-      <button class="add-review-btn" @click="openForm()">+ Добавить обзор</button>
+      <h2>Смартфоны</h2>
+      <button class="add-review-btn" @click="openForm()">+ Добавить смартфон</button>
     </div>
 
     <div v-if="reviews.length === 0" class="no-reviews">
-      Пока нет обзоров. Будьте первым, кто добавит!
+      Пока нет смартфонов. Будьте первым, кто добавит!
     </div>
 
     <div v-else class="reviews-list">
@@ -17,7 +17,7 @@
         @click="goToReview(review.id)"
       >
         <div class="review-header">
-          <h3>{{ review.title }}</h3>
+          <h3>Обзоры на {{ review.device.manufacturer }} {{ review.device.model }}</h3>
           <div class="review-controls">
             <a href="#" class="review-link" @click.stop.prevent="openForm(review)">Редактировать</a>
             <a href="#" class="review-link" @click.stop.prevent="deleteReview(review.id)">Удалить</a>
@@ -26,9 +26,8 @@
 
         <transition name="slide">
           <div class="review-content">
-            <p class="review-summary">{{ review.content }}</p>
             <div class="review-footer">
-              <span class="review-author">Автор: {{ review.author?.username || '—' }}</span>
+              <span class="review-author">Смартфон добавил пользователь: {{ review.author?.username || '—' }}</span>
             </div>
           </div>
         </transition>
@@ -38,16 +37,11 @@
     <!-- Форма добавления/редактирования -->
     <div v-if="showForm" class="modal-overlay">
       <div class="modal">
-        <h3>{{ editingReview ? 'Редактировать обзор' : 'Добавить обзор' }}</h3>
+        <h3>{{ editingReview ? 'Редактировать смартфон' : 'Добавить смартфон' }}</h3>
         <form @submit.prevent="submitReview">
-          <input v-model="form.title" placeholder="Заголовок" required />
-          <textarea v-model="form.content" placeholder="Содержание" required></textarea>
-
-          <input v-model="form.device.deviceType" placeholder="Тип устройства" required />
           <input v-model="form.device.model" placeholder="Модель" required />
           <input v-model="form.device.manufacturer" placeholder="Производитель" required />
           <input type="date" v-model="form.device.dateOfCreation" required />
-
           <input v-model="form.device.imageUrl" placeholder="URL изображения" />
 
           <div class="modal-actions">
@@ -59,6 +53,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -75,7 +70,6 @@ const form = ref({
   title: '',
   content: '',
   device: {
-    deviceType: '',
     model: '',
     manufacturer: '',
     dateOfCreation: new Date().toISOString().split('T')[0],
@@ -89,9 +83,8 @@ const openForm = (review = null) => {
     form.value = {
       id: review.id,
       title: review.title,
-      content: review.content,
+      content: '',
       device: {
-        deviceType: review.device.deviceType || '',
         model: review.device.model || '',
         manufacturer: review.device.manufacturer || '',
         dateOfCreation: review.device.dateOfCreation || new Date().toISOString().split('T')[0],
@@ -105,7 +98,6 @@ const openForm = (review = null) => {
       title: '',
       content: '',
       device: {
-        deviceType: '',
         model: '',
         manufacturer: '',
         dateOfCreation: new Date().toISOString().split('T')[0],
@@ -123,13 +115,28 @@ const closeForm = () => {
 
 const submitReview = async () => {
   try {
+    // Устанавливаем служебные поля
+    form.value.title = `${form.value.device.manufacturer} ${form.value.device.model}`.trim()
+    form.value.content = ''
+    const device = {
+      ...form.value.device,
+      deviceType: 'phone' // устанавливаем вручную
+    }
+
+    const payload = {
+      id: form.value.id,
+      title: form.value.title,
+      content: '',
+      device
+    }
+
     const method = editingReview.value ? 'PUT' : 'POST'
     const url = 'http://localhost:8080/reviews/'
     const response = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify(form.value)
+      body: JSON.stringify(payload)
     })
 
     if (!response.ok) {
@@ -144,7 +151,7 @@ const submitReview = async () => {
 }
 
 const deleteReview = async (id) => {
-  if (!confirm('Удалить обзор?')) return
+  if (!confirm('Удалить смартфон?')) return
   try {
     const response = await fetch(`http://localhost:8080/reviews/${id}`, {
       method: 'DELETE',
@@ -182,6 +189,8 @@ onMounted(() => {
   fetchReviews()
 })
 </script>
+
+
 
 <style scoped>
 .reviews-section {
