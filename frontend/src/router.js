@@ -38,7 +38,8 @@ const routes = [
     component: () => import('@/review/components/ReviewDetail.vue') // путь к компоненту подробностей
   },
   {
-    path: '/user/:username',
+    path: '/user/me',
+    //path: '/user/:username',
     name: 'UserPage',
     component: () => import('@/views/UserPage.vue'),
   }

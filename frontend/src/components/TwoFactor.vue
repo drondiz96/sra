@@ -75,17 +75,18 @@ export default {
           throw new Error("Ошибка сети");
         });
 
-        const resultText = await response.text();
 
         // Обрабатываем текстовые ответы сервера
         if (response.ok) {
-          if (resultText === "2FA verification success") {
-            document.cookie = `userEmail=${encodeURIComponent(this.email)}; path=/; max-age=31536000`;
-            this.$router.push({path: "/reviews/"});
-          } else {
-            throw new Error("Неожиданный ответ сервера");
-          }
+          const data = await response.json(); // ожидаем JSON с id, username, email
+          document.cookie = `userId=${encodeURIComponent(data.id)}; path=/; max-age=${60*60*24*365}`;
+          document.cookie = `username=${encodeURIComponent(data.username)}; path=/; max-age=${60*60*24*365}`;
+          document.cookie = `userEmail=${encodeURIComponent(data.email)}; path=/; max-age=${60*60*24*365}`;
+
+          this.$router.push({ path: "/reviews/" });        
         } else {
+            const resultText = await response.text();
+
           if (resultText === "Invalid 2FA code") {
             throw new Error("Неверный код подтверждения");
           }

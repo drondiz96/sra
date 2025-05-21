@@ -23,20 +23,25 @@ const user = ref({
   avatar: defaultAvatar,
 })
 
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
+  return match ? decodeURIComponent(match[2]) : null
+}
+
 async function fetchCurrentUser() {
   try {
-    const response = await fetch('http://localhost:8080/users/2', {
-      method: 'GET',
-      credentials: 'include',
-    })
-    console.log(response)
-    if (response.ok) {
-      const data = await response.json()
-      user.value = {
-        username: data.username,
-        avatar: data.avatar || defaultAvatar,
-      }
+    const avatar = getCookie('userAvatar')
+    const username = getCookie('username')
+    if (!username) {
+      console.warn('Email в куки не найден')
+      return
     }
+
+    user.value = {
+      username: username,
+      avatar: avatar || defaultAvatar
+    }
+        
   } catch (error) {
     console.error('Ошибка при загрузке пользователя:', error)
   }
@@ -48,7 +53,7 @@ const onImageError = (event) => {
 
 const navigateToProfile = () => {
   if (!user.value.username || user.value.username === 'Гость') return
-  router.push({ name: 'UserPage', params: { username: user.value.username } })
+router.push({ name: 'UserPage'})
 }
 
 onMounted(() => {
