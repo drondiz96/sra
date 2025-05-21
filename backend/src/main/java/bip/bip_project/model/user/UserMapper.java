@@ -7,8 +7,9 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+    @Mapping(target = "id", ignore = true)
+    User toEntity(UserRequestDto dto);
 
-    // User toEntity(UserRequestDto dto);
     UserResponseDto toDto(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

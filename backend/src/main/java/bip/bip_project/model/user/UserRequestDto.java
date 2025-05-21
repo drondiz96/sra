@@ -1,6 +1,7 @@
 package bip.bip_project.model.user;
 
 public class UserRequestDto {
+    Integer id;
     String username;
     String role;
     String password;
@@ -13,6 +14,14 @@ public class UserRequestDto {
         this.role = role;
         this.password = password;
         this.email = email;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getUsername() {

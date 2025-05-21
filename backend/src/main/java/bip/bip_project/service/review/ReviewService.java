@@ -126,7 +126,10 @@ public class ReviewService implements IReviewService {
         // Получаем и сохраняем внешние обзоры
         externalReviewService.fetchAndSaveExternalReviews(review);
 
-        return reviewMapper.toDto(review);
+        Review savedReview = reviewRepository.findById(review.getId())
+                .orElseThrow(() -> new RuntimeException("Review not found after save"));
+
+        return reviewMapper.toDto(savedReview);
     }
 
     @Override

@@ -14,11 +14,11 @@ import java.util.Optional;
 public interface IUserRepository extends JpaRepository<User, Integer> {
 
 //    @Query("SELECT new bip.bip_project.model.user.UserDto(u.id, u.username, u.role, u.password, u.email) FROM User u")
-//    List<UserRequestDto> findAllUserDto();
-//
+//    List<User> findAllUserDto();
+
 //    @Query("SELECT new bip.bip_project.model.user.UserDto(u.id, u.username, u.role, u.password, u.email) " +
 //            "FROM User u WHERE u.email = :email")
-//    UserRequestDto findUserDtoByEmail(@Param("email") String email);
+//    User findUserDtoByEmail(@Param("email") String email);
 
     Optional<User> findByEmail(@Param("email") String email);
 }
