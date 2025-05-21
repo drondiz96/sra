@@ -80,12 +80,8 @@ export default {
         // Обрабатываем текстовые ответы сервера
         if (response.ok) {
           if (resultText === "2FA verification success") {
-            this.$router.push({
-              path: "/reviews/",
-              state: {
-                email: this.email
-              }
-            });
+            document.cookie = `userEmail=${encodeURIComponent(this.email)}; path=/; max-age=31536000`;
+            this.$router.push({path: "/reviews/"});
           } else {
             throw new Error("Неожиданный ответ сервера");
           }

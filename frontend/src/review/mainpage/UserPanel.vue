@@ -2,41 +2,58 @@
   <div class="user-panel">
     <div class="user-card" @click="navigateToProfile">
       <img
-        :src="props.user.avatar"
+        :src="user.avatar"
         alt="Аватар пользователя"
         class="user-avatar"
         @error="onImageError"
       />
-      <span class="user-login">{{ props.user.username || 'Гость' }}</span>
+      <span class="user-login">{{ user.username || 'Гость' }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import defaultAvatar from '@/assets/default-avatar.gif'
 
-const props = defineProps({
-  user: {
-    type: Object,
-    required: false,
-    default: () => ({ username: 'Гость' })
-  }
+const router = useRouter()
+const user = ref({
+  username: 'Гость',
+  avatar: defaultAvatar,
 })
 
-const router = useRouter()
+async function fetchCurrentUser() {
+  try {
+    const response = await fetch('http://localhost:8080/users/2', {
+      method: 'GET',
+      credentials: 'include',
+    })
+    console.log(response)
+    if (response.ok) {
+      const data = await response.json()
+      user.value = {
+        username: data.username,
+        avatar: data.avatar || defaultAvatar,
+      }
+    }
+  } catch (error) {
+    console.error('Ошибка при загрузке пользователя:', error)
+  }
+}
+
+const onImageError = (event) => {
+  event.target.src = defaultAvatar
+}
 
 const navigateToProfile = () => {
-  const username = props.user.username || props.user.login
-  if (!username || username === 'Гость') return
-  router.push({ name: 'UserPage', params: { username } })
+  if (!user.value.username || user.value.username === 'Гость') return
+  router.push({ name: 'UserPage', params: { username: user.value.username } })
 }
 
-// fallback на случай ошибки загрузки изображения
-const onImageError = (event) => {
-  event.target.src = defaultAvatar // добавь этот файл в public/images
-}
+onMounted(() => {
+  fetchCurrentUser()
+})
 </script>
 
 <style scoped>

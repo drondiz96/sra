@@ -4,14 +4,12 @@ import RegisterForm from "@/components/RegisterForm.vue";
 import MailVerify from "@/components/MailVerify.vue";
 
 import TwoFactor from "@/components/TwoFactor.vue";
-import Dashboard from "@/components/UserDashboard.vue";
-
 import review from "@/review/MainPage.vue";
-import PhoneDetails from '@/review/PhoneDetails.vue';
+
 const routes = [
   {
     path: "/",
-    redirect: "/review", // Перенаправление на страницу входа
+    redirect: "/reviews", // Перенаправление на страницу входа
   },
   {
     path: "/login",
@@ -31,24 +29,13 @@ const routes = [
     component: TwoFactor
   },
   {
-    path: "/dashboard",
-    component: Dashboard,
-    meta: { requiresAuth: true }, // Защищенный маршрут
-  },
-  {
     path: "/reviews",
     component: review
   },
   {
     path: "/reviews/:id",
     name: 'ReviewDetail',
-    component: () => import('@/review/ReviewDetail.vue') // путь к компоненту подробностей
-  },
-  {
-    path: '/phones/:id',
-    name: 'PhoneDetails',
-    component: PhoneDetails,
-    props: true
+    component: () => import('@/review/components/ReviewDetail.vue') // путь к компоненту подробностей
   },
   {
     path: '/user/:username',
@@ -64,7 +51,7 @@ const router = createRouter({
 
 // Навигационный хук для проверки авторизации
 router.beforeEach((to, from, next) => {
-  const protectedPages = ['/dashboard', '/profile', '/settings']; // Список защищённых страниц
+  const protectedPages = ['/profile', '/settings']; // Список защищённых страниц
   const token = localStorage.getItem('token');
   
   // Если запрашивается защищённая страница и нет токена

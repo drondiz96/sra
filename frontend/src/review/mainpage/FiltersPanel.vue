@@ -2,37 +2,34 @@
   <div class="filters-sidebar">
     <div class="filter-group">
       <h3>Фильтры</h3>
-      
+
       <div class="filter-item">
+        <label for="date">Дата</label>
         <input 
-          type="text" 
-          :value="searchQuery"
-          placeholder="Поиск по модели..."
-          @input="$emit('update:searchQuery', $event.target.value)"
+          type="date" 
+          :value="dateFilter"
+          @input="$emit('update:dateFilter', $event.target.value)"
         >
       </div>
 
       <div class="filter-item">
-        <label>Цена (₽)</label>
-        <div class="price-range">
-          <input 
-            type="number" 
-            :value="priceRange[0]"
-            placeholder="От"
-            min="0"
-            @input="handlePriceInput(0, $event)"
-            class="price-input"
-          >
-          <span class="separator">–</span>
-          <input 
-            type="number" 
-            :value="priceRange[1]"
-            placeholder="До"
-            min="0"
-            @input="handlePriceInput(1, $event)"
-            class="price-input"
-          >
-        </div>
+        <label for="manufacturer">Производитель</label>
+        <input 
+          type="text" 
+          :value="manufacturerFilter"
+          placeholder="Напр. Samsung"
+          @input="$emit('update:manufacturerFilter', $event.target.value)"
+        >
+      </div>
+
+      <div class="filter-item">
+        <label for="model">Модель</label>
+        <input 
+          type="text" 
+          :value="modelFilter"
+          placeholder="Напр. Galaxy S24"
+          @input="$emit('update:modelFilter', $event.target.value)"
+        >
       </div>
     </div>
   </div>
@@ -41,26 +38,18 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 
-const props = defineProps({
-  searchQuery: String,
-  priceRange: Array
+defineProps({
+  dateFilter: String,
+  manufacturerFilter: String,
+  modelFilter: String,
 })
 
-const emit = defineEmits([
-  'update:searchQuery',
-  'update:priceRange',
-  'validate-price'
+defineEmits([
+  'update:dateFilter',
+  'update:manufacturerFilter',
+  'update:modelFilter',
 ])
-
-const handlePriceInput = (index, event) => {
-  const newPriceRange = [...props.priceRange]
-  const value = Number(event.target.value)
-  newPriceRange[index] = value >= 0 ? value : null
-  emit('update:priceRange', newPriceRange)
-  emit('validate-price')
-}
 </script>
-
 
 <style scoped>
 .filters-sidebar {
@@ -72,7 +61,6 @@ const handlePriceInput = (index, event) => {
   top: 30px;
   height: fit-content;
   max-width: 100%;
-  overflow-wrap: break-word;
   box-sizing: border-box;
 }
 
@@ -87,7 +75,7 @@ const handlePriceInput = (index, event) => {
 }
 
 input[type="text"],
-input[type="number"] {
+input[type="date"] {
   width: 100%;
   padding: 12px 15px;
   border: 2px solid #e0e0e0;
@@ -103,40 +91,10 @@ input:focus {
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
-.price-range {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.price-input {
-  flex: 1 1 100px;
-  text-align: center;
-  padding: 12px;
-  min-width: 0;
-}
-
-.separator {
-  color: #666;
-  font-weight: bold;
-  text-align: center;
-}
-
-/* Medium screens and below */
 @media (max-width: 900px) {
   .filters-sidebar {
     position: static;
     margin-bottom: 30px;
-  }
-
-  .price-range {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .separator {
-    display: none;
   }
 }
 </style>

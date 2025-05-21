@@ -2,23 +2,19 @@
   <div class="container">
     <!-- Фильтры слева -->
     <FiltersPanel 
-      :search-query="searchQuery"
-      :price-range="priceRange"
-      @update:searchQuery="val => searchQuery = val"
-      @update:priceRange="val => priceRange = val"
-      @validate-price="validatePriceInput"
+      :dateFilter="dateFilter"
+      :manufacturerFilter="manufacturerFilter"
+      :modelFilter="modelFilter"
+      @update:dateFilter="val => dateFilter = val"
+      @update:manufacturerFilter="val => manufacturerFilter = val"
+      @update:modelFilter="val => modelFilter = val"
     />
 
-    <!-- Основной контент справа -->
     <div class="content-main">
-      <!-- Плитка пользователя -->
-      <UserProfileCard 
-        :user="user"
-      />
+      <UserProfileCard/>
 
-      <!-- Список обзоров -->
       <div class="reviews-grid">
-        <ReviewList />
+        <ReviewList/>
       </div>
     </div>
   </div>
@@ -27,25 +23,13 @@
 <script setup>
 import FiltersPanel from '@/review/mainpage/FiltersPanel.vue'
 import UserProfileCard from '@/review/mainpage/UserPanel.vue'
-import { usePhones } from '@/review/data/usePhones'
-import ReviewList from './ReviewList.vue'
-import defaultAvatar from '@/assets/default-avatar.gif'
+import ReviewList from './mainpage/ReviewList.vue'
+import { ref } from 'vue'
 
 // Получаем данные и фильтры
-const {
-  // isLoading,
-  // filteredPhones,
-  searchQuery,
-  priceRange,
-  validatePriceInput,
-} = usePhones()
-
-// Временный пользователь, можно заменить позже
-const user = {
-  id: 1,
-  username: 'Иван Иванов',
-  avatar: defaultAvatar
-}
+const dateFilter = ref(null)
+const manufacturerFilter = ref('')
+const modelFilter = ref('')
 </script>
 
 <style scoped>
