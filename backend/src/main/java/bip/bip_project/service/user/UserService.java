@@ -2,6 +2,7 @@ package bip.bip_project.service.user;
 
 import bip.bip_project.exception.user.UserDtoException;
 import bip.bip_project.exception.user.UserNotFoundException;
+import bip.bip_project.exception.user.WeakPasswordException;
 import bip.bip_project.model.user.User;
 import bip.bip_project.model.user.UserMapper;
 import bip.bip_project.model.user.UserRequestDto;
@@ -26,10 +27,31 @@ public class UserService implements IUserService{
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
+        String password = userRequestDto.getPassword();
+
+        if (password == null || !isPasswordStrong(password)) {
+            throw new WeakPasswordException("Password must be at least 6 characters long and contain both letters and digits");
+        }
+
         User user = new User();
         BeanUtils.copyProperties(userRequestDto, user, new String[] {"id"});
         userRepository.save(user);
         return userMapper.toDto(user);
+    }
+
+    private boolean isPasswordStrong(String password) {
+        if (password.length() < 6) return false;
+
+        boolean hasLetter = false;
+        boolean hasDigit = false;
+
+        for (char c : password.toCharArray()) {
+            if (Character.isLetter(c)) hasLetter = true;
+            if (Character.isDigit(c)) hasDigit = true;
+            if (hasLetter && hasDigit) return true;
+        }
+
+        return false;
     }
 
     @Override
