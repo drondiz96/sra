@@ -9,8 +9,25 @@
       />
       <span class="user-login">{{ user.username || 'Гость' }}</span>
     </div>
+
+    <button
+      v-if="user.username !== 'Гость'"
+      class="logout-btn"
+      @click="logout"
+    >
+      Выйти
+    </button>
+
+    <button
+      v-else
+      class="login-btn"
+      @click="goToLogin"
+    >
+      Войти
+    </button>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -22,6 +39,25 @@ const user = ref({
   username: 'Гость',
   avatar: defaultAvatar,
 })
+
+const logout = () => {
+  const cookiesToDelete = ['userId', 'username', 'userEmail', 'userAvatar']
+  cookiesToDelete.forEach(name => {
+    document.cookie = `${name}=; Max-Age=0; path=/`
+  })
+
+  user.value = {
+    username: 'Гость',
+    avatar: defaultAvatar
+  }
+
+  router.push('/login/')
+}
+
+const goToLogin = () => {
+  router.push('/login/')
+}
+
 
 function getCookie(name) {
   const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
@@ -99,6 +135,30 @@ onMounted(() => {
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.logout-btn,
+.login-btn {
+  margin-left: 10px;
+  padding: 8px 14px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logout-btn {
+  background-color: #e74c3c;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+
+.login-btn:hover {
+  background-color: #2980b9;
 }
 
 @media (max-width: 900px) {
