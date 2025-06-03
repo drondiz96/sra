@@ -2,19 +2,22 @@ package bip.bip_project.service.comment;
 
 import bip.bip_project.model.comment.Comment;
 import bip.bip_project.model.comment.CommentDto;
+import bip.bip_project.model.comment.CommentRequestDto;
+import bip.bip_project.model.comment.CommentResponseDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 
 public interface ICommentService {
-    List<CommentDto> getCommentsByReviewId(Integer reviewId);
+    List<CommentResponseDto> getCommentsByReviewId(Integer reviewId);
 
-    CommentDto getCommentById(Integer id);
+    Comment getCommentById(Integer id);
+    CommentResponseDto getCommentResponseDtoById(Integer id);
 
-    CommentDto createComment(CommentDto commentDto);
+    CommentResponseDto createComment(String email, Integer reviewId, CommentRequestDto commentRequestDto);
 
-    CommentDto updateCommentById(CommentDto commentDto);
+    CommentResponseDto updateCommentById(String email, CommentRequestDto commentRequestDto);
 
-    CommentDto deleteCommentById(Integer id);
+    void deleteCommentById(String email, Integer commentId);
 }

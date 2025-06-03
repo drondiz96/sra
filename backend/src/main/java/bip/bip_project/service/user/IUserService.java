@@ -1,13 +1,14 @@
 package bip.bip_project.service.user;
 
 import bip.bip_project.model.user.User;
-import bip.bip_project.model.user.UserDto;
+import bip.bip_project.model.user.UserRequestDto;
+import bip.bip_project.model.user.UserResponseDto;
 
 import java.util.Map;
 
 public interface IUserService {
     // create
-    UserDto createUser(UserDto userDto);
+    UserResponseDto createUser(UserRequestDto userRequestDto);
     void saveUser(User user);
 
     // confirm
@@ -17,12 +18,12 @@ public interface IUserService {
     User identicateAndAuthenticate(String email, String password);
 
     // read
-    UserDto getUserDtoById(Integer Id);
+    UserResponseDto getUserDtoById(Integer Id);
     User getUserByEmail(String email);
-    UserDto getUserDtoByEmail(Map<String, Object> data);
+    UserResponseDto getUserDtoByEmail(Map<String, Object> data);
 
     // update
-    UserDto updateUser(UserDto userDto);
+    UserResponseDto updateUser(UserRequestDto userRequestDto);
 
     // delete
     void deleteUserById(Integer userId);

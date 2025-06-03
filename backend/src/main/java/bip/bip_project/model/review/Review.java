@@ -40,18 +40,23 @@ public class Review {
     @JsonBackReference("user-reviews")
     private User author;
 
-    @ElementCollection
-    private List<String> tags = new ArrayList<>();
+//    @ElementCollection
+//    private List<String> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Rating> ratings = new ArrayList<>();
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference("review-externalReviews")
+    private List<ExternalReview> externalReviews = new ArrayList<>();
+
+
+//    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Rating> ratings = new ArrayList<>();
 
     public Review(){}
 
-    public Review(Integer id, String title, String content, LocalDate dateOfCreation, LocalDate dateOfChanged, Device device, User author, List<String> tags, List<Comment> comments, List<Rating> ratings) {
+    public Review(Integer id, String title, String content, LocalDate dateOfCreation, LocalDate dateOfChanged, Device device, User author, List<Comment> comments) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -59,9 +64,7 @@ public class Review {
         this.dateOfChanged = dateOfChanged;
         this.device = device;
         this.author = author;
-        this.tags = tags;
         this.comments = comments;
-        this.ratings = ratings;
     }
 
     public Integer getId() {
@@ -120,14 +123,6 @@ public class Review {
         this.author = author;
     }
 
-    public List<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
     public List<Comment> getComments() {
         return comments;
     }
@@ -136,12 +131,12 @@ public class Review {
         this.comments = comments;
     }
 
-    public List<Rating> getRatings() {
-        return ratings;
+    public List<ExternalReview> getExternalReviews() {
+        return externalReviews;
     }
 
-    public void setRatings(List<Rating> ratings) {
-        this.ratings = ratings;
+    public void setExternalReviews(List<ExternalReview> externalReviews) {
+        this.externalReviews = externalReviews;
     }
 }
 

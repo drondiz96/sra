@@ -48,6 +48,11 @@ export default {
     async handleSubmit() {
       try {
         // Отправка данных на бэкенд
+        console.log("data: ", JSON.stringify({
+            email: this.username,
+            password: this.password,
+          }));
+
         const response = await fetch("http://localhost:8080/users/authenticate", {
           method: "POST",
           headers: {

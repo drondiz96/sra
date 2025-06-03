@@ -1,24 +1,22 @@
 package bip.bip_project.service.device;
 
-import bip.bip_project.model.device.Device;
-import bip.bip_project.model.device.DeviceDto;
-import org.springframework.stereotype.Service;
+import bip.bip_project.model.device.DeviceRequestDto;
 
 import java.util.List;
 
 
 public interface IDeviceService {
-    DeviceDto getDeviceById();
+    DeviceRequestDto getDeviceById();
 
-    List<DeviceDto> getDevicesByManufacturerId(String manufacturerId);
+    List<DeviceRequestDto> getDevicesByManufacturerId(String manufacturerId);
 
-    List<DeviceDto> getDevicesByDeviceType(String deviceType);
+    List<DeviceRequestDto> getDevicesByDeviceType(String deviceType);
 
-    DeviceDto getDeviceByModel(String model);
+    DeviceRequestDto getDeviceByModel(String model);
 
-    DeviceDto createDevice(DeviceDto deviceDto);
+    DeviceRequestDto createDevice(DeviceRequestDto deviceRequestDto);
 
-    DeviceDto updateDevice(DeviceDto deviceDto);
+    DeviceRequestDto updateDevice(DeviceRequestDto deviceRequestDto);
 
     void deleteDeviceById(Integer id);
 }

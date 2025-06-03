@@ -2,10 +2,10 @@ package bip.bip_project.controller.user;
 
 import bip.bip_project.model.authenticate.AuthResponse;
 import bip.bip_project.model.authenticate.AuthenticationRequest;
-import bip.bip_project.model.authenticate.AuthenticationResponse;
 import bip.bip_project.model.authenticate.Verify2faRequest;
 import bip.bip_project.model.user.User;
-import bip.bip_project.model.user.UserDto;
+import bip.bip_project.model.user.UserRequestDto;
+import bip.bip_project.model.user.UserResponseDto;
 import bip.bip_project.security.JwtUtil;
 import bip.bip_project.service.user.IUserService;
 import bip.bip_project.service.user.TwoFactorAuthService;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.Map;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,12 +40,12 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Ошибка при создании пользователя")
     })
     @PostMapping("/createUser")
-    ResponseEntity<?> createUser(@RequestBody UserDto userDto){
-        userService.createUser(userDto);
+    ResponseEntity<?> createUser(@RequestBody UserRequestDto userRequestDto){
+        userService.createUser(userRequestDto);
 
         String code = twoFactorAuthService.generateCode();
-        twoFactorAuthService.sendCode(userDto.getEmail(), code);
-        twoFactorAuthService.storeCode(userDto.getEmail(), code);
+        twoFactorAuthService.sendCode(userRequestDto.getEmail(), code);
+        twoFactorAuthService.storeCode(userRequestDto.getEmail(), code);
 
         return ResponseEntity.ok(new AuthResponse("2FA code sent to your email for confirm your email"));
         //return ResponseEntity.ok(userService.createUser(userDto));
@@ -72,8 +73,8 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Пользователь не найден")
     })
     @PutMapping("/")
-    ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto){
-        return ResponseEntity.ok(userService.updateUser(userDto));
+    ResponseEntity<UserResponseDto> updateUser(@RequestBody UserRequestDto userRequestDto){
+        return ResponseEntity.ok(userService.updateUser(userRequestDto));
     }
 
     @Operation(summary = "Получить пользователя по ID", responses = {
@@ -81,7 +82,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Пользователь не найден")
     })
     @GetMapping("/{id}")
-    ResponseEntity<UserDto> getUserDtoById(@PathVariable("id") Integer id){
+    ResponseEntity<UserResponseDto> getUserDtoById(@PathVariable("id") Integer id){
         return ResponseEntity.ok(userService.getUserDtoById(id));
     }
 
@@ -90,7 +91,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Пользователь не найден")
     })
     @PostMapping("/byEmail/")
-    ResponseEntity<UserDto> getUserDtoByEmail(@RequestBody Map<String, Object> data) {
+    ResponseEntity<UserResponseDto> getUserDtoByEmail(@RequestBody Map<String, Object> data) {
         return ResponseEntity.ok(userService.getUserDtoByEmail(data));
     }
 
@@ -142,7 +143,7 @@ public class UserController {
             // return ResponseEntity.ok(new AuthenticationResponse(jwt));
 
             // это реализация через cookie, браузер самостоятельно увидит что в этом ответе есть cookie и сохранит jwt в свои cookie и будет всегда автоматически прикреплять его при обращении к бекенду
-            return ResponseEntity.ok("2FA verification success");
+            return ResponseEntity.ok(userService.getUserDtoByEmail(Map.of("email", email)));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid 2FA code");
         }

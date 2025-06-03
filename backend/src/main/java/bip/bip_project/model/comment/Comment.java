@@ -4,6 +4,7 @@ import bip.bip_project.model.review.Review;
 import bip.bip_project.model.user.User;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -25,17 +26,19 @@ public class Comment {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    private Date dateOfCreation;
+    private LocalDate dateOfCreation;
+    private LocalDate dateOfChanged;
 
     public Comment() {
     }
 
-    public Comment(Integer id, String content, Review review, User author, Date dateOfCreation) {
+    public Comment(Integer id, String content, Review review, User author, LocalDate dateOfCreation, LocalDate dateOfChanged) {
         this.id = id;
         this.content = content;
         this.review = review;
         this.author = author;
         this.dateOfCreation = dateOfCreation;
+        this.dateOfChanged = dateOfChanged;
     }
 
     public Integer getId() {
@@ -70,12 +73,20 @@ public class Comment {
         this.author = author;
     }
 
-    public Date getDateOfCreation() {
+    public LocalDate getDateOfCreation() {
         return dateOfCreation;
     }
 
-    public void setDateOfCreation(Date dateOfCreation) {
+    public void setDateOfCreation(LocalDate dateOfCreation) {
         this.dateOfCreation = dateOfCreation;
+    }
+
+    public LocalDate getDateOfChanged() {
+        return dateOfChanged;
+    }
+
+    public void setDateOfChanged(LocalDate dateOfChanged) {
+        this.dateOfChanged = dateOfChanged;
     }
 }
 

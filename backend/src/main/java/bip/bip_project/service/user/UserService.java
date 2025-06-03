@@ -2,8 +2,11 @@ package bip.bip_project.service.user;
 
 import bip.bip_project.exception.user.UserDtoException;
 import bip.bip_project.exception.user.UserNotFoundException;
+import bip.bip_project.exception.user.WeakPasswordException;
 import bip.bip_project.model.user.User;
-import bip.bip_project.model.user.UserDto;
+import bip.bip_project.model.user.UserMapper;
+import bip.bip_project.model.user.UserRequestDto;
+import bip.bip_project.model.user.UserResponseDto;
 import bip.bip_project.repository.user.IUserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.annotation.Secured;
@@ -15,17 +18,40 @@ import java.util.Optional;
 @Service
 public class UserService implements IUserService{
     IUserRepository userRepository;
+    UserMapper userMapper;
 
-    public UserService(IUserRepository userRepository) {
+    public UserService(IUserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     @Override
-    public UserDto createUser(UserDto userDto) {
+    public UserResponseDto createUser(UserRequestDto userRequestDto) {
+        String password = userRequestDto.getPassword();
+
+        if (password == null || !isPasswordStrong(password)) {
+            throw new WeakPasswordException("Password must be at least 6 characters long and contain both letters and digits");
+        }
+
         User user = new User();
-        BeanUtils.copyProperties(userDto, user, new String[] {"id"});
+        BeanUtils.copyProperties(userRequestDto, user, new String[] {"id"});
         userRepository.save(user);
-        return getUserDtoById(user.getId());
+        return userMapper.toDto(user);
+    }
+
+    private boolean isPasswordStrong(String password) {
+        if (password.length() < 6) return false;
+
+        boolean hasLetter = false;
+        boolean hasDigit = false;
+
+        for (char c : password.toCharArray()) {
+            if (Character.isLetter(c)) hasLetter = true;
+            if (Character.isDigit(c)) hasDigit = true;
+            if (hasLetter && hasDigit) return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -75,29 +101,30 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public UserDto getUserDtoById(Integer id) {
+    public UserResponseDto getUserDtoById(Integer id) {
         User user = getUserById(id);
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(user, userDto);
-        return userDto;
+//        UserRequestDto userRequestDto = new UserRequestDto();
+//        BeanUtils.copyProperties(user, userRequestDto);
+        return userMapper.toDto(user);
     }
 
     @Override
-    public UserDto getUserDtoByEmail(Map<String, Object> data) {
+    public UserResponseDto getUserDtoByEmail(Map<String, Object> data) {
         String email = data.get("email").toString();
-        return userRepository.findUserDtoByEmail(email);
+        User user = getUserByEmail(email);
+        return userMapper.toDto(user);
     }
 
     @Override
     @Secured({"ROLE_USER", "ROLE_ADMIN"})
-    public UserDto updateUser(UserDto userDto) {
-        if (userDto.getId() == null) {
+    public UserResponseDto updateUser(UserRequestDto userRequestDto) {
+        if (userRequestDto.getId() == null) {
             throw new UserDtoException("Field 'id' is null");
         }
-        User user = getUserById(userDto.getId());
-        BeanUtils.copyProperties(userDto, user, new String[] {"id"});
+        User user = getUserById(userRequestDto.getId());
+        BeanUtils.copyProperties(userRequestDto, user, new String[] {"id", "email"});
         userRepository.save(user);
-        return getUserDtoById(user.getId());
+        return userMapper.toDto(user);
     }
 
     @Override

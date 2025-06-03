@@ -1,7 +1,7 @@
 package bip.bip_project.service.auth;
 
 import bip.bip_project.exception.user.UserNotFoundException;
-import bip.bip_project.model.user.UserDto;
+import bip.bip_project.model.user.UserRequestDto;
 import bip.bip_project.security.JwtUtil;
 import bip.bip_project.service.user.UserService;
 import org.springframework.security.core.Authentication;
@@ -37,7 +37,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         try {
             userService.getUserByEmail(email);
         } catch (UserNotFoundException ex) {
-            userService.createUser(new UserDto(name, "ROLE_USER", null, email));
+            userService.createUser(new UserRequestDto(name, "ROLE_USER", null, email));
             userService.setCreateViaGoogle(email);  // устанавливаем что акк создан через Google
             userService.confirmEmail(email);
         }
@@ -54,6 +54,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         response.addCookie(cookie);
 
         // Редирект на фронт
-        response.sendRedirect("http://localhost:8080/swagger-ui/index.html");
+        // response.sendRedirect("http://localhost:8080/swagger-ui/index.html");
+        response.sendRedirect("http://localhost:8081/reviews");
     }
 }

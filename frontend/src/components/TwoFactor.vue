@@ -75,7 +75,7 @@ export default {
           throw new Error("Ошибка сети");
         });
 
-
+        console.log(response)
         // Обрабатываем текстовые ответы сервера
         if (response.ok) {
           const data = await response.json(); // ожидаем JSON с id, username, email

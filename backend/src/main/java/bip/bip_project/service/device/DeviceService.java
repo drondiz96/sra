@@ -1,6 +1,6 @@
 package bip.bip_project.service.device;
 
-import bip.bip_project.model.device.DeviceDto;
+import bip.bip_project.model.device.DeviceRequestDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -8,32 +8,32 @@ import java.util.List;
 @Service
 public class DeviceService implements IDeviceService {
     @Override
-    public DeviceDto getDeviceById() {
+    public DeviceRequestDto getDeviceById() {
         return null;
     }
 
     @Override
-    public List<DeviceDto> getDevicesByManufacturerId(String manufacturerId) {
+    public List<DeviceRequestDto> getDevicesByManufacturerId(String manufacturerId) {
         return List.of();
     }
 
     @Override
-    public List<DeviceDto> getDevicesByDeviceType(String deviceType) {
+    public List<DeviceRequestDto> getDevicesByDeviceType(String deviceType) {
         return List.of();
     }
 
     @Override
-    public DeviceDto getDeviceByModel(String model) {
+    public DeviceRequestDto getDeviceByModel(String model) {
         return null;
     }
 
     @Override
-    public DeviceDto createDevice(DeviceDto deviceDto) {
+    public DeviceRequestDto createDevice(DeviceRequestDto deviceRequestDto) {
         return null;
     }
 
     @Override
-    public DeviceDto updateDevice(DeviceDto deviceDto) {
+    public DeviceRequestDto updateDevice(DeviceRequestDto deviceRequestDto) {
         return null;
     }
 
