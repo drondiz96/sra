@@ -4,12 +4,12 @@ import RegisterForm from "@/components/RegisterForm.vue";
 import MailVerify from "@/components/MailVerify.vue";
 
 import TwoFactor from "@/components/TwoFactor.vue";
-import Dashboard from "@/components/UserDashboard.vue";
+import review from "@/review/MainPage.vue";
 
 const routes = [
   {
     path: "/",
-    redirect: "/login", // Перенаправление на страницу входа
+    redirect: "/reviews", // Перенаправление на страницу входа
   },
   {
     path: "/login",
@@ -29,10 +29,20 @@ const routes = [
     component: TwoFactor
   },
   {
-    path: "/dashboard",
-    component: Dashboard,
-    meta: { requiresAuth: true }, // Защищенный маршрут
+    path: "/reviews",
+    component: review
   },
+  {
+    path: "/reviews/:id",
+    name: 'ReviewDetail',
+    component: () => import('@/review/components/ReviewDetail.vue') // путь к компоненту подробностей
+  },
+  {
+    path: '/user/me',
+    //path: '/user/:username',
+    name: 'UserPage',
+    component: () => import('@/views/UserPage.vue'),
+  }
 ];
 
 const router = createRouter({
@@ -42,7 +52,7 @@ const router = createRouter({
 
 // Навигационный хук для проверки авторизации
 router.beforeEach((to, from, next) => {
-  const protectedPages = ['/dashboard', '/profile', '/settings']; // Список защищённых страниц
+  const protectedPages = ['/profile', '/settings']; // Список защищённых страниц
   const token = localStorage.getItem('token');
   
   // Если запрашивается защищённая страница и нет токена

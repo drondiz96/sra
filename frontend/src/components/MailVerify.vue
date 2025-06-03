@@ -53,7 +53,7 @@
             throw new Error("Код должен состоять из 6 цифр");
           }
   
-          const response = await fetch("http://192.168.0.105:8080/users/createUser/register-verify-email", {
+          const response = await fetch("http://localhost:8080/users/createUser/register-verify-email", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

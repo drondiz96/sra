@@ -3,13 +3,13 @@
       <h2>Регистрация</h2>
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
-          <label for="username">Имя пользователя:</label>
+          <label for="username">Почта пользователя:</label>
           <input
             type="text"
             id="username"
             v-model="username"
             required
-            placeholder="Введите имя пользователя"
+            placeholder="Введите вашу почту"
           />
         </div>
         <div class="form-group">
@@ -72,7 +72,7 @@
           }
   
           // Отправка данных на бэкенд
-          const response = await fetch("http://192.168.0.105:8080/users/createUser", {
+          const response = await fetch("http://localhost:8080/users/createUser", {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
