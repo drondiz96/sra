@@ -131,7 +131,7 @@ const submitReview = async () => {
     }
 
     const method = editingReview.value ? 'PUT' : 'POST'
-    const url = 'http://localhost:8080/reviews/'
+    const url = 'http://reviewphoneserve:8080/reviews/'
     const response = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
@@ -153,33 +153,42 @@ const submitReview = async () => {
 const deleteReview = async (id) => {
   if (!confirm('Удалить смартфон?')) return
   try {
-    const response = await fetch(`http://localhost:8080/reviews/${id}`, {
+    const response = await fetch(`http://reviewphoneserve:8080/reviews/${id}`, {
       method: 'DELETE',
       credentials: 'include'
     })
     if (!response.ok) throw new Error(`Ошибка удаления: ${response.status}`)
 
-    await fetchReviews()
+    await fetchReviews('DEVICE_TYPE', 'phone')
   } catch (err) {
     console.error('Ошибка при удалении обзора:', err)
   }
 }
-
 const fetchReviews = async () => {
+  console.log('🔍 fetchReviews: начало запроса...')
+
   try {
-    const response = await fetch('http://localhost:8080/reviews/filter?filterType=DEVICE_TYPE&value=phone', {
+    const url = 'http://reviewphoneserve:8080/reviews/filter?filterType=DEVICE_TYPE&value=phone'
+    console.log(`📡 Запрос к API: ${url}`)
+
+    const response = await fetch(url, {
       method: 'GET',
       credentials: 'include'
     })
 
+    console.log(`✅ Ответ получен: status = ${response.status}`)
+
     if (!response.ok) throw new Error(`Ошибка загрузки: ${response.status}`)
 
     const data = await response.json()
+    console.log('📦 Полученные данные:', data)
+
     reviews.value = data
   } catch (error) {
-    console.error('Ошибка при получении обзоров:', error)
+    console.error('❌ Ошибка при получении обзоров:', error)
   }
 }
+
 
 const goToReview = (id) => {
   router.push(`/reviews/${id}`)

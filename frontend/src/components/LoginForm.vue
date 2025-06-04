@@ -29,7 +29,7 @@
       Нет аккаунта?
       <router-link to="/register">Зарегистрируйтесь</router-link>
     </p>
-    <a href="http://localhost:8080/oauth2/authorization/google">
+    <a href="http://reviewphoneserve:8080/oauth2/authorization/google">
       <button>Войти через Google</button>
     </a>
   </div>
@@ -48,7 +48,7 @@ export default {
     async handleSubmit() {
       try {
         // Отправка данных на бэкенд
-        const response = await fetch("http://localhost:8080/users/authenticate", {
+        const response = await fetch("http://reviewphoneserve:8080/users/authenticate", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

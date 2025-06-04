@@ -4,17 +4,9 @@ module.exports = defineConfig({
   transpileDependencies: true,
 
   devServer: {
-    host: 'phonereview',
+    host: 'phonereview', // слушает на всех IP, включая 192.168.0.105
     port: 8081,
-    allowedHosts: 'all',
-
-    setupMiddlewares(middlewares, devServer) {
-      // отключаем проверку Host-заголовка
-      devServer.app.use((req, res, next) => {
-        req.headers.host = 'localhost'; // подменяем заголовок
-        next();
-      });
-      return middlewares;
-    }
+    allowedHosts: 'all', // разрешаем любые заголовки Host
+    historyApiFallback: true // важно для SPA, чтобы не было 404 при перезагрузке
   }
-});
+})

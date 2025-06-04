@@ -77,7 +77,7 @@ const submitEdit = async () => {
   if (!content) return
 
   try {
-    const response = await fetch(`http://localhost:8080/comments/`, {
+    const response = await fetch(`http://reviewphoneserve:8080/comments/`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -96,7 +96,7 @@ const submitEdit = async () => {
 
 const handleDelete = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/comments/${props.comment.id}`, {
+    const response = await fetch(`http://reviewphoneserve:8080/comments/${props.comment.id}`, {
       method: 'DELETE',
       credentials: 'include'
     })

@@ -64,7 +64,7 @@ export default {
         }
 
         const response = await fetch(
-          "http://localhost:8080/users/authenticate/auth-verify-2fa",
+          "http://reviewphoneserve:8080/users/authenticate/auth-verify-2fa",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
