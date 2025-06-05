@@ -11,10 +11,10 @@
     />
 
     <div class="content-main">
-      <UserProfileCard/>
+      <UserProfileCard />
 
       <div class="reviews-grid">
-        <ReviewList/>
+        <ReviewList :reviews="reviews" />
       </div>
     </div>
   </div>
@@ -24,13 +24,69 @@
 import FiltersPanel from '@/review/mainpage/FiltersPanel.vue'
 import UserProfileCard from '@/review/mainpage/UserPanel.vue'
 import ReviewList from './mainpage/ReviewList.vue'
-import { ref } from 'vue'
 
-// Получаем данные и фильтры
+import { ref, watch } from 'vue'
+
 const dateFilter = ref(null)
 const manufacturerFilter = ref('')
 const modelFilter = ref('')
+
+const reviews = ref([])
+
+const fetchReviews = async () => {
+  console.log('🔍 fetchReviews: начало запроса...')
+
+  try {
+    const params = new URLSearchParams()
+
+
+    if (dateFilter.value) {
+      params.append('filterType', 'DATE')
+      params.append('value', dateFilter.value)
+
+    }
+    else if (manufacturerFilter.value) {
+      params.append('filterType', 'MANUFACTURER')
+      params.append('value', manufacturerFilter.value)
+    }
+    else if (modelFilter.value) {
+      params.append('filterType', 'DEVICE_MODEL')
+      params.append('value', modelFilter.value)
+    }
+    else {
+      params.append('filterType', 'DEVICE_TYPE')
+      params.append('value', 'phone')
+    }
+    const url = `http://reviewphoneserve:8080/reviews/filter?${params.toString()}`
+    console.log(`📡 Запрос к API: ${url}`)
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include'
+    })
+
+    console.log(`✅ Ответ получен: status = ${response.status}`)
+    if (!response.ok) throw new Error(`Ошибка загрузки: ${response.status}`)
+
+    const data = await response.json()
+    console.log('📦 Полученные данные:', data)
+    reviews.value = data
+  } catch (error) {
+    console.error('❌ Ошибка при получении обзоров:', error)
+  }
+}
+
+
+// Автоматический вызов при изменении фильтров
+watch([dateFilter, manufacturerFilter, modelFilter], () => {
+  fetchReviews()
+})
+
+// Также можно вызвать один раз при монтировании
+fetchReviews()
 </script>
+
+
 
 <style scoped>
 .container {
