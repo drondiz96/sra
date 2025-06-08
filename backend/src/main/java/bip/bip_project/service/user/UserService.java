@@ -32,7 +32,7 @@ public class UserService implements IUserService{
         String password = userRequestDto.getPassword();
 
         if (password == null || !isPasswordStrong(password)) {
-            throw new WeakPasswordException("Password must be at least 6 characters long and contain both letters and digits");
+            // throw new WeakPasswordException("Password must be at least 6 characters long and contain both letters and digits");
         }
 
         User user = new User();
