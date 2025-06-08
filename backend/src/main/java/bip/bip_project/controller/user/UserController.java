@@ -193,6 +193,24 @@ public class UserController {
         return ResponseEntity.ok("Password expired flag updated");
     }
 
+    @Operation(
+            summary = "Завершить сессию",
+            description = "Удаляет JWT cookie на клиенте, разлогинивая пользователя"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пользователь разлогинен"),
+    })
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("jwt", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // в проде — true (для строгой передачи только по https)
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // Удаляем cookie (обнуляю время)
+
+        response.addCookie(cookie);
+        return ResponseEntity.ok("Logged out successfully");
+    }
 
 
 }
