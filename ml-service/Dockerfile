@@ -3,7 +3,7 @@
 ###############################################################################
 
 # 1) Базовый слой: Debian-slim + Python 3.10
-FROM python:3.10-slim
+FROM python:3.13-slim
 
 # 2) Переменные окружения
 ENV PYTHONUNBUFFERED=1 \
@@ -22,11 +22,14 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# 5) Копируем исходники приложения
+# 5) Копируем конфиг с доверенными доменами
+COPY trusted_sources.json .
+
+# 6) Копируем исходники приложения
 COPY . .
 
-# 6) Открываем порт API
+# 7) Открываем порт API
 EXPOSE 8000
 
-# 7) Команда запуска (production-режим)
+# 8) Команда запуска (production-режим)
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

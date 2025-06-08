@@ -1,54 +1,29 @@
 """
-processors.py  —  HTML/YT → текст  → summary (OpenAI | fallback)
+processors.py  —  HTML → текст → summary (+ pros / cons + recommendation)
 """
 from __future__ import annotations
-import json, logging, re
-from typing import List, Literal, Tuple
+import json
+import logging
+import os
+import re
+from typing import Any, Dict, List
 
-import openai
-from openai import AsyncOpenAI
 from bs4 import BeautifulSoup
-from readability import Document
-from pydantic import BaseModel
-from langdetect import detect            # ⭑ авто-язык
+from langdetect import detect
+from openai import AsyncOpenAI
+from readability.readability import Document
 
 from api import OPENAI_KEY
 
-# тихие логи
-for noisy in ("openai",):
-    logging.getLogger(noisy).setLevel(logging.WARNING)
-
-try:
-    from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
-    YT_AVAILABLE = True
-except ModuleNotFoundError:
-    logging.warning("youtube-transcript-api не установлен — видео пропускаются")
-    YT_AVAILABLE = False
-
-
-class Review(BaseModel):
-    title: str
-    content: str
-    pros: str
-    cons: str
-    author: str
-    date: str
-    source: str
-    url: str
-    retrieved_at: str
-
-
-class ReviewsResponse(BaseModel):
-    status: Literal["success"] = "success"
-    data: List[Review]
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL")
+log = logging.getLogger(__name__)
 
 
 class ArticleProcessor:
-    # HTML
+    # ── HTML ----------------------------------------------------------
     @staticmethod
-    def extract_article(html: str) -> dict[str, str]:
+    def extract_article(html: str) -> Dict[str, str]:
         doc = Document(html)
-        soup = BeautifulSoup(html, "lxml")
         text = BeautifulSoup(doc.summary(), "lxml").get_text(" ", strip=True)
         text = re.sub(r"\s{2,}", " ", text)
         return {
@@ -58,64 +33,99 @@ class ArticleProcessor:
             "date": "Дата не указана",
         }
 
-    # YouTube
+    # ── fallback ------------------------------------------------------
     @staticmethod
-    def extract_youtube(video_id: str) -> dict[str, str] | None:
-        if not YT_AVAILABLE:
-            return None
-        try:
-            trs = YouTubeTranscriptApi.get_transcript(video_id, languages=["ru", "en"])
-            text = " ".join(t["text"] for t in trs)
-            text = re.sub(r"\s{2,}", " ", text)
-            return {
-                "title": f"YouTube video {video_id}",
-                "text": text,
-                "author": "YouTube",
-                "date": "Дата не указана",
-            }
-        except (TranscriptsDisabled, NoTranscriptFound):
-            return None
-        except Exception as exc:
-            logging.debug("YT transcript err %s", exc)
-            return None
+    def _fallback(txt: str) -> Dict[str, Any]:
+        words = txt.split()
+        preview = " ".join(words[:60]) + ("…" if len(words) > 60 else "")
+        return {
+            "summary": preview,
+            "pros": [],
+            "cons": [],
+            "recommendation": "Недостаточно информации для рекомендации."
+        }
 
-    # fallback
+    # ── summarizer ----------------------------------------------------
     @staticmethod
-    def _fallback(txt: str) -> Tuple[str, str, str]:
-        prev = " ".join(txt.split()[:60]) + ("…" if len(txt.split()) > 60 else "")
-        return prev, "Не указаны", "Не указаны"
-
-    # summarize
-    @staticmethod
-    async def summarize(text: str, lang: str | None) -> Tuple[str, str, str]:
-        if not OPENAI_KEY or len(text) < 50:
+    async def summarize(text: str, ratio: float, lang: str | None) -> Dict[str, Any]:
+        # Если API-ключ отсутствует или текст очень короткий, возвращаем «фолбэк»
+        if not OPENAI_KEY or len(text.split()) < 50:
             return ArticleProcessor._fallback(text)
 
+        # Определяем язык, если «auto»
         if lang in (None, "auto"):
             try:
                 lang = detect(text[:1000])
             except Exception:
                 lang = "en"
 
-        prompt = (
-            f"Проанализируй обзор. Верни JSON: summary (2-4 предлож.), "
-            f"pros/cons (3-5 пунктов через ';'). Язык ответа — {lang}.\n\n{text[:8000]}"
+        # Целевое количество слов в summary
+        total_words = len(text.split())
+        tgt_words = max(1, int(total_words * ratio))
+
+        system_prompt = f"""
+You are a concise and precise review-summarization agent optimized for GPT-4o-mini.
+When you receive the full text of one product review, you MUST output a single valid JSON object with **exactly** these keys (and no others):
+  • "summary" – связное резюме длиной ≈ {tgt_words} слов (±10%).
+  • "pros" – массив из 3–5 коротких сильных пунктов (5–10 слов каждый).
+  • "cons" – массив из 3–5 коротких слабых пунктов (5–10 слов каждый).
+  • "recommendation" – рекомендации по покупке этого телефону, учитывая типичные потребности пользователя
+    (не более 20–30 слов, чётко и понятно).
+
+Требования:
+  1. Никогда не добавляй дополнительные ключи, текст или комментарии вне JSON.
+  2. JSON должен быть строго валидным:
+     – двойные кавычки вокруг ключей и строк,
+     – без завершающих запятых,
+     – без символов «…» в самом JSON.
+  3. Не использовать markdown, заголовки вроде "Overall:", "Summary:" и т. д.
+  4. Язык ответа: {lang}.
+
+Если текст обзора слишком короткий (< 50 слов), верни:
+{{
+  "summary": "<первые 30–50 слов или весь текст>",
+  "pros": [],
+  "cons": [],
+  "recommendation": "Недостаточно информации для рекомендации."
+}}
+""".strip()
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": text},
+        ]
+
+        client = AsyncOpenAI(
+            api_key=OPENAI_KEY,
+            base_url=OPENAI_BASE_URL or None,
+            max_retries=0,
         )
+
         try:
-            client = AsyncOpenAI(api_key=OPENAI_KEY, max_retries=0)
             resp = await client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.1, max_tokens=400,
+                model="gpt-4o-mini",
+                messages=messages,
+                temperature=0.0,
+                max_tokens=1024,
                 response_format={"type": "json_object"},
-                timeout=20,
+                timeout=120,
             )
-            data = json.loads(resp.choices[0].message.content)
-            return (
-                data.get("summary", "Нет краткого содержания"),
-                data.get("pros", "Не указаны"),
-                data.get("cons", "Не указаны"),
-            )
-        except Exception:
-            logging.debug("LLM fallback")
+            jd = json.loads(resp.choices[0].message.content)
+        except Exception as exc:
+            log.error("❌ OpenAI error: %s", exc, exc_info=True)
             return ArticleProcessor._fallback(text)
+
+        def _to_list(val: Any) -> List[str]:
+            if isinstance(val, list):
+                return [v.strip() for v in val if isinstance(v, str)]
+            if isinstance(val, str):
+                parts = re.split(r"[;•,\.]\s*", val)
+                return [p.strip() for p in parts if p.strip()]
+            return []
+
+        return {
+            "summary": jd.get("summary", "").strip(),
+            "pros": _to_list(jd.get("pros", [])),
+            "cons": _to_list(jd.get("cons", [])),
+            "recommendation": jd.get("recommendation", "").strip()
+        }

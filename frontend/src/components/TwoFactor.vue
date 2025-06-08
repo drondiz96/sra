@@ -64,7 +64,7 @@ export default {
         }
 
         const response = await fetch(
-          "http://localhost:8080/users/authenticate/auth-verify-2fa",
+          "http://reviewphoneserve:8080/users/authenticate/auth-verify-2fa",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -75,7 +75,7 @@ export default {
           throw new Error("Ошибка сети");
         });
 
-        console.log(response)
+
         // Обрабатываем текстовые ответы сервера
         if (response.ok) {
           const data = await response.json(); // ожидаем JSON с id, username, email

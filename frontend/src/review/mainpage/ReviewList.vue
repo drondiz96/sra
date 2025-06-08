@@ -27,7 +27,9 @@
         <transition name="slide">
           <div class="review-content">
             <div class="review-footer">
-              <span class="review-author">Смартфон добавил пользователь: {{ review.author?.username || '—' }}</span>
+              <span class="review-author">
+                Смартфон добавил пользователь: {{ review.author?.username || '—' }}
+              </span>
             </div>
           </div>
         </transition>
@@ -54,13 +56,20 @@
   </div>
 </template>
 
-
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, defineProps, defineEmits} from 'vue'
 import { useRouter } from 'vue-router'
 
+defineProps({
+  reviews: {
+    type: Array,
+    required: true
+  }
+})
+
+const emit = defineEmits(['refresh'])
+
 const router = useRouter()
-const reviews = ref([])
 
 const showForm = ref(false)
 const editingReview = ref(null)
@@ -115,12 +124,11 @@ const closeForm = () => {
 
 const submitReview = async () => {
   try {
-    // Устанавливаем служебные поля
     form.value.title = `${form.value.device.manufacturer} ${form.value.device.model}`.trim()
     form.value.content = ''
     const device = {
       ...form.value.device,
-      deviceType: 'phone' // устанавливаем вручную
+      deviceType: 'phone'
     }
 
     const payload = {
@@ -131,7 +139,7 @@ const submitReview = async () => {
     }
 
     const method = editingReview.value ? 'PUT' : 'POST'
-    const url = 'http://localhost:8080/reviews/'
+    const url = 'http://reviewphoneserve:8080/reviews/'
     const response = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
@@ -143,7 +151,7 @@ const submitReview = async () => {
       throw new Error(`Ошибка: ${response.status}`)
     }
 
-    await fetchReviews()
+    emit('refresh')
     closeForm()
   } catch (err) {
     console.error('Ошибка при сохранении обзора:', err)
@@ -153,42 +161,23 @@ const submitReview = async () => {
 const deleteReview = async (id) => {
   if (!confirm('Удалить смартфон?')) return
   try {
-    const response = await fetch(`http://localhost:8080/reviews/${id}`, {
+    const response = await fetch(`http://reviewphoneserve:8080/reviews/${id}`, {
       method: 'DELETE',
       credentials: 'include'
     })
     if (!response.ok) throw new Error(`Ошибка удаления: ${response.status}`)
 
-    await fetchReviews()
+    emit('refresh')
   } catch (err) {
     console.error('Ошибка при удалении обзора:', err)
-  }
-}
-
-const fetchReviews = async () => {
-  try {
-    const response = await fetch('http://localhost:8080/reviews/filter?filterType=DEVICE_TYPE&value=phone', {
-      method: 'GET',
-      credentials: 'include'
-    })
-
-    if (!response.ok) throw new Error(`Ошибка загрузки: ${response.status}`)
-
-    const data = await response.json()
-    reviews.value = data
-  } catch (error) {
-    console.error('Ошибка при получении обзоров:', error)
   }
 }
 
 const goToReview = (id) => {
   router.push(`/reviews/${id}`)
 }
-
-onMounted(() => {
-  fetchReviews()
-})
 </script>
+
 
 
 

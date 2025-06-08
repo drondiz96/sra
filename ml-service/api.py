@@ -1,17 +1,56 @@
 """
-api.py  —  Google-поиск, кэш (diskcache), скачивание HTML
+api.py  —  Google-поиск, кэш, скачивание HTML
 """
-from __future__ import annotations
-import asyncio, logging, os, re, time
-from typing import Any, Dict, List, Optional
 
-import aiohttp, backoff, diskcache
+from __future__ import annotations
+import threading
+import sys
+if not hasattr(threading.Thread, "isAlive"):
+    threading.Thread.isAlive = threading.Thread.is_alive
+# ─────────────────────────────────────────────────────────────────────────────────
+
+import asyncio
+import logging
+import os
+import re
+import time
+import json
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
+
+import aiohttp
+import backoff
+import diskcache
 from dotenv import load_dotenv
 from googlesearch import search as google_search
 
-# ── env ───────────────────────────────────────────────────────────────
-load_dotenv(".env")
+# ── .env ────────────────────────────────────────────────────────────────────────
+BASE_DIR = Path(__file__).resolve().parent
+ENV_FILE = BASE_DIR / ".env"
+print(f"📄 .env → {ENV_FILE} | exists: {ENV_FILE.exists()}", file=sys.stderr)
+load_dotenv(ENV_FILE, override=False)
+
 OPENAI_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+
+# ── доверенные текстовые источники (загрузка из JSON) -------------------------
+TRUSTED_CONFIG = BASE_DIR / "trusted_sources.json"
+if not TRUSTED_CONFIG.exists():
+    logging.error(f"Не найден файл с доверенными доменами: {TRUSTED_CONFIG}")
+    TRUSTED_SOURCES: Set[str] = set()
+else:
+    try:
+        with open(TRUSTED_CONFIG, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        # Ожидаем, что это список строк
+        TRUSTED_SOURCES = set(domain.lower() for domain in data if isinstance(domain, str))
+    except Exception as e:
+        logging.error(f"Ошибка при чтении {TRUSTED_CONFIG}: {e}")
+        TRUSTED_SOURCES = set()
 
 HEADERS: Dict[str, str] = {
     "User-Agent": (
@@ -21,19 +60,19 @@ HEADERS: Dict[str, str] = {
     "Accept-Language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
 }
 
-# ── cache ─────────────────────────────────────────────────────────────
+# ── cache ----------------------------------------------------------------------
 try:
     CACHE: diskcache.Cache | Dict[str, Any] = diskcache.Cache(".reviews_cache")
 except ModuleNotFoundError:
-    logging.warning("diskcache не найден — кэширование выключено")
+    logging.warning("diskcache не найден — кэш выключен")
 
     class _Dummy(dict):
-        def clear(self):                       # type: ignore[override]
+        def clear(self):
             n = len(self)
             super().clear()
             return n
 
-    CACHE = _Dummy()                           # type: ignore[assignment]
+    CACHE = _Dummy()  # type: ignore[assignment]
 
 def purge_cache() -> int:
     try:
@@ -41,7 +80,7 @@ def purge_cache() -> int:
     except Exception:
         return 0
 
-# ── aiohttp singleton ────────────────────────────────────────────────
+# ── aiohttp singleton ----------------------------------------------------------
 async def _session() -> aiohttp.ClientSession:
     if not hasattr(_session, "_s") or _session._s.closed:            # type: ignore[attr-defined]
         _session._s = aiohttp.ClientSession(                         # type: ignore[attr-defined]
@@ -50,7 +89,11 @@ async def _session() -> aiohttp.ClientSession:
         )
     return _session._s                                               # type: ignore[attr-defined]
 
-# ── ReviewsAPI ───────────────────────────────────────────────────────
+async def close_session():
+    if hasattr(_session, "_s") and not _session._s.closed:           # type: ignore[attr-defined]
+        await _session._s.close()                                    # type: ignore[attr-defined]
+
+# ── ReviewsAPI ---------------------------------------------------------------
 class ReviewsAPI:
     """Google-поиск ссылок + кэш + скачивание HTML"""
 
@@ -62,19 +105,18 @@ class ReviewsAPI:
     def _google_sync(q: str, lang: str, n: int) -> List[str]:
         try:
             out = list(google_search(q, lang=lang, num_results=n))
-            time.sleep(2.0)
+            time.sleep(1.0)
             return out
         except TypeError:
-            logging.warning("googlesearch: fallback без num_results")
             return list(google_search(q))[:n]
 
     @staticmethod
-    @backoff.on_exception(backoff.expo, (Exception,), max_tries=3, base=2, factor=2)
+    @backoff.on_exception(backoff.expo, Exception, max_tries=3)
     async def search_links(q: str, *, lang: str = "en", n: int = 30) -> List[str]:
         ck = f"google:{lang}:{q}"
         if (c := CACHE.get(ck)):
             logging.info("Google cache hit %s", q)
-            return c                                               # type: ignore[return-value]
+            return c  # type: ignore[return-value]
 
         raw = await asyncio.to_thread(ReviewsAPI._google_sync, q, lang, n)
         raw = [ReviewsAPI._norm(u) for u in raw if not u.lower().endswith(".pdf")]
@@ -90,15 +132,14 @@ class ReviewsAPI:
         CACHE.set(ck, uniq, expire=86_400)
         return uniq
 
-    # HTML
     @staticmethod
     @backoff.on_exception(backoff.expo,
                           (aiohttp.ClientError, asyncio.TimeoutError),
-                          max_tries=3, base=1, factor=2)
+                          max_tries=3)
     async def fetch_html(url: str) -> Optional[str]:
         ck = f"html:{url}"
         if (c := CACHE.get(ck)):
-            return c                                               # type: ignore[return-value]
+            return c  # type: ignore[return-value]
 
         sess = await _session()
         try:

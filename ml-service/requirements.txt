@@ -10,5 +10,6 @@ googlesearch-python         # Google search API
 openai                      # клиент OpenAI-совместимых LLM
 pydantic>=2,<3              # модели данных
 langdetect                  # авто-определение языка
-youtube-transcript-api      # субтитры YouTube (если нужна поддержка видео)
 lxml_html_clean 
+lxml
+processors
