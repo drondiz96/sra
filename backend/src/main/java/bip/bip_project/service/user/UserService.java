@@ -12,6 +12,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -116,6 +118,16 @@ public class UserService implements IUserService{
     }
 
     @Override
+    @Secured("ROLE_ADMIN")
+    public List<UserResponseDto> getAllUsers() {
+        List<UserResponseDto> usersDto = new ArrayList<>();
+        for (User user : userRepository.findAll()){
+            usersDto.add(userMapper.toDto(user));
+        }
+        return usersDto;
+    }
+
+    @Override
     @Secured({"ROLE_USER", "ROLE_ADMIN"})
     public UserResponseDto updateUser(UserRequestDto userRequestDto) {
         if (userRequestDto.getId() == null) {
@@ -126,6 +138,15 @@ public class UserService implements IUserService{
         userRepository.save(user);
         return userMapper.toDto(user);
     }
+
+    @Override
+    @Secured("ROLE_ADMIN")
+    public void setPasswordExpiredFlag(String email, boolean expired) {
+        User user = getUserByEmail(email);
+        user.setPasswordExpired(expired);
+        userRepository.save(user);
+    }
+
 
     @Override
     @Secured("ROLE_ADMIN")

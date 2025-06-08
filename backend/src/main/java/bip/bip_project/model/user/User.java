@@ -31,6 +31,10 @@ public class User {
     @Column(nullable = false)
     Boolean emailIsConfirmed = false;
 
+    @Column(name = "password_expired")
+    private boolean passwordExpired = false;
+
+
     @Column(nullable = false)
     String role;  // Заменено с List<String> на String
 
@@ -106,4 +110,13 @@ public class User {
     public void setCreatedViaGoogle(Boolean createdViaGoogle) {
         this.createdViaGoogle = createdViaGoogle;
     }
+
+    public boolean isPasswordExpired() {
+        return passwordExpired;
+    }
+
+    public void setPasswordExpired(boolean passwordExpired) {
+        this.passwordExpired = passwordExpired;
+    }
+
 }

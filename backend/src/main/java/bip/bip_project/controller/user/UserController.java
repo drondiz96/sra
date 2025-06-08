@@ -9,13 +9,20 @@ import bip.bip_project.model.user.UserResponseDto;
 import bip.bip_project.security.JwtUtil;
 import bip.bip_project.service.user.IUserService;
 import bip.bip_project.service.user.TwoFactorAuthService;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.hibernate.sql.OracleJoinFragment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -104,6 +111,22 @@ public class UserController {
         userService.deleteUserById(id);
     }
 
+    @Secured("ROLE_ADMIN")
+    @Operation(
+            summary = "Получить всех пользователей",
+            description = "Позволяет администратору получить список всех зарегистрированных пользователей"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Список пользователей успешно получен",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserResponseDto.class)))),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещён — требуется роль ADMIN")
+    })
+    @GetMapping("/all")
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+
     @Operation(summary = "Аутентификация пользователя", responses = {
             @ApiResponse(responseCode = "200", description = "Код 2FA отправлен"),
             @ApiResponse(responseCode = "401", description = "Неверный email или пароль")
@@ -148,4 +171,28 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid 2FA code");
         }
     }
+
+    @Secured("ROLE_ADMIN")
+    @PostMapping("/set-password-expired")
+    @Operation(summary = "Установить флаг устаревшего пароля пользователю",
+            description = "Позволяет администратору установить или снять флаг устаревшего пароля по email.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Флаг успешно обновлён"),
+            @ApiResponse(responseCode = "400", description = "Ошибка валидации запроса"),
+            @ApiResponse(responseCode = "403", description = "Нет доступа (требуется роль ADMIN)")
+    })
+    public ResponseEntity<?> setPasswordExpired(@RequestBody Map<String, String> request) {
+        if (!request.containsKey("email") || !request.containsKey("expired")) {
+            return ResponseEntity.badRequest().body("Missing 'email' or 'expired' in request body");
+        }
+
+        String email = request.get("email");
+        boolean expired = Boolean.parseBoolean(request.get("expired"));
+
+        userService.setPasswordExpiredFlag(email, expired);
+        return ResponseEntity.ok("Password expired flag updated");
+    }
+
+
+
 }
