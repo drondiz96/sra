@@ -16,6 +16,10 @@ public interface IUserService {
     void confirmEmail(String email);
     void setCreateViaGoogle(String email);
 
+    // lock & unlock
+    public void lockUser(String email);
+    public void unlockUser(String email);
+
     User identicateAndAuthenticate(String email, String password);
 
     void setPasswordExpiredFlag(String email, boolean expired);

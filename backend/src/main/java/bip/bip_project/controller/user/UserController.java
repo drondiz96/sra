@@ -9,6 +9,7 @@ import bip.bip_project.model.user.UserResponseDto;
 import bip.bip_project.security.JwtUtil;
 import bip.bip_project.service.user.IUserService;
 import bip.bip_project.service.user.TwoFactorAuthService;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -212,5 +213,61 @@ public class UserController {
         return ResponseEntity.ok("Logged out successfully");
     }
 
+
+    @Secured("ROLE_ADMIN")
+    @Operation(
+            summary = "Заблокировать аккаунт пользователя",
+            description = "Позволяет администратору временно отключить доступ пользователя к системе. После блокировки пользователь не сможет аутентифицироваться и использовать API."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пользователь успешно заблокирован"),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещён — требуется роль ADMIN"),
+            @ApiResponse(responseCode = "400", description = "Некорректный email или отсутствует параметр")
+    })
+
+    @PostMapping("/lock")
+    public ResponseEntity<?> lockUser(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Email пользователя, которого нужно заблокировать",
+                    required = true,
+                    content = @Content(schema = @Schema(example = "{\"email\": \"some_email@gmail.com\"}"))
+            )
+            @RequestBody Map<String, String> request
+    ) {
+        if (!request.containsKey("email")) {
+            return ResponseEntity.badRequest().body("Missing 'email' field in request body");
+        }
+
+        userService.lockUser(request.get("email"));
+        return ResponseEntity.ok("User account locked");
+    }
+
+    @Secured("ROLE_ADMIN")
+    @Operation(
+            summary = "Разблокировать аккаунт пользователя",
+            description = "Позволяет администратору восстановить доступ пользователя к системе. После разблокировки пользователь сможет снова входить в систему и пользоваться API."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пользователь успешно разблокирован"),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещён — требуется роль ADMIN"),
+            @ApiResponse(responseCode = "400", description = "Некорректный email или отсутствует параметр")
+    })
+
+    @PostMapping("/unlock")
+    public ResponseEntity<?> unlockUser(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Email пользователя, которого нужно разблокировать",
+                    required = true,
+                    content = @Content(schema = @Schema(example = "{\"email\": \"some_email@gmail.com\"}"))
+            )
+            @RequestBody Map<String, String> request
+    ) {
+        if (!request.containsKey("email")) {
+            return ResponseEntity.badRequest().body("Missing 'email' field in request body");
+        }
+
+        userService.unlockUser(request.get("email"));
+        return ResponseEntity.ok("User account unlocked");
+    }
 
 }

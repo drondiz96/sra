@@ -155,4 +155,19 @@ public class UserService implements IUserService{
             throw new UserNotFoundException("Not found user with such Id");
         userRepository.deleteById(userId);
     }
+
+    @Secured("ROLE_ADMIN")
+    public void lockUser(String email) {
+        User user = getUserByEmail(email);
+        user.setAccountLocked(true);
+        userRepository.save(user);
+    }
+
+    @Secured("ROLE_ADMIN")
+    public void unlockUser(String email) {
+        User user = getUserByEmail(email);
+        user.setAccountLocked(false);
+        userRepository.save(user);
+    }
+
 }

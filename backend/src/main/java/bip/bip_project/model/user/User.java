@@ -34,6 +34,8 @@ public class User {
     @Column(name = "password_expired")
     private boolean passwordExpired = false;
 
+    @Column(name = "account_is_locked")
+    private boolean accountLocked = false; // смотреть JwtRequestFilter.java
 
     @Column(nullable = false)
     String role;  // Заменено с List<String> на String
@@ -119,4 +121,19 @@ public class User {
         this.passwordExpired = passwordExpired;
     }
 
+    public boolean isAccountLocked() {
+        return accountLocked;
+    }
+
+    public void setAccountLocked(boolean accountLocked) {
+        this.accountLocked = accountLocked;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+    }
 }
