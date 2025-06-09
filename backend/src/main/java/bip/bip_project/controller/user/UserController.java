@@ -9,13 +9,21 @@ import bip.bip_project.model.user.UserResponseDto;
 import bip.bip_project.security.JwtUtil;
 import bip.bip_project.service.user.IUserService;
 import bip.bip_project.service.user.TwoFactorAuthService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.hibernate.sql.OracleJoinFragment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -62,7 +70,7 @@ public class UserController {
 
         if (twoFactorAuthService.verifyCode(email, code)) {
             userService.confirmEmail(email);
-            return ResponseEntity.ok(userService.getUserByEmail(email));
+            return ResponseEntity.ok(userService.getUserDtoByEmail(Map.of("email", email)));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid 2FA code");
         }
@@ -103,6 +111,22 @@ public class UserController {
     void deleteUserById(@PathVariable("id") Integer id){
         userService.deleteUserById(id);
     }
+
+    @Secured("ROLE_ADMIN")
+    @Operation(
+            summary = "Получить всех пользователей",
+            description = "Позволяет администратору получить список всех зарегистрированных пользователей"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Список пользователей успешно получен",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserResponseDto.class)))),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещён — требуется роль ADMIN")
+    })
+    @GetMapping("/all")
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
 
     @Operation(summary = "Аутентификация пользователя", responses = {
             @ApiResponse(responseCode = "200", description = "Код 2FA отправлен"),
@@ -148,4 +172,102 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid 2FA code");
         }
     }
+
+    @Secured("ROLE_ADMIN")
+    @PostMapping("/set-password-expired")
+    @Operation(summary = "Установить флаг устаревшего пароля пользователю",
+            description = "Позволяет администратору установить или снять флаг устаревшего пароля по email.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Флаг успешно обновлён"),
+            @ApiResponse(responseCode = "400", description = "Ошибка валидации запроса"),
+            @ApiResponse(responseCode = "403", description = "Нет доступа (требуется роль ADMIN)")
+    })
+    public ResponseEntity<?> setPasswordExpired(@RequestBody Map<String, String> request) {
+        if (!request.containsKey("email") || !request.containsKey("expired")) {
+            return ResponseEntity.badRequest().body("Missing 'email' or 'expired' in request body");
+        }
+
+        String email = request.get("email");
+        boolean expired = Boolean.parseBoolean(request.get("expired"));
+
+        userService.setPasswordExpiredFlag(email, expired);
+        return ResponseEntity.ok("Password expired flag updated");
+    }
+
+    @Operation(
+            summary = "Завершить сессию",
+            description = "Удаляет JWT cookie на клиенте, разлогинивая пользователя"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пользователь разлогинен"),
+    })
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("jwt", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // в проде — true (для строгой передачи только по https)
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // Удаляем cookie (обнуляю время)
+
+        response.addCookie(cookie);
+        return ResponseEntity.ok("Logged out successfully");
+    }
+
+
+    @Secured("ROLE_ADMIN")
+    @Operation(
+            summary = "Заблокировать аккаунт пользователя",
+            description = "Позволяет администратору временно отключить доступ пользователя к системе. После блокировки пользователь не сможет аутентифицироваться и использовать API."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пользователь успешно заблокирован"),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещён — требуется роль ADMIN"),
+            @ApiResponse(responseCode = "400", description = "Некорректный email или отсутствует параметр")
+    })
+
+    @PostMapping("/lock")
+    public ResponseEntity<?> lockUser(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Email пользователя, которого нужно заблокировать",
+                    required = true,
+                    content = @Content(schema = @Schema(example = "{\"email\": \"some_email@gmail.com\"}"))
+            )
+            @RequestBody Map<String, String> request
+    ) {
+        if (!request.containsKey("email")) {
+            return ResponseEntity.badRequest().body("Missing 'email' field in request body");
+        }
+
+        userService.lockUser(request.get("email"));
+        return ResponseEntity.ok("User account locked");
+    }
+
+    @Secured("ROLE_ADMIN")
+    @Operation(
+            summary = "Разблокировать аккаунт пользователя",
+            description = "Позволяет администратору восстановить доступ пользователя к системе. После разблокировки пользователь сможет снова входить в систему и пользоваться API."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пользователь успешно разблокирован"),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещён — требуется роль ADMIN"),
+            @ApiResponse(responseCode = "400", description = "Некорректный email или отсутствует параметр")
+    })
+
+    @PostMapping("/unlock")
+    public ResponseEntity<?> unlockUser(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Email пользователя, которого нужно разблокировать",
+                    required = true,
+                    content = @Content(schema = @Schema(example = "{\"email\": \"some_email@gmail.com\"}"))
+            )
+            @RequestBody Map<String, String> request
+    ) {
+        if (!request.containsKey("email")) {
+            return ResponseEntity.badRequest().body("Missing 'email' field in request body");
+        }
+
+        userService.unlockUser(request.get("email"));
+        return ResponseEntity.ok("User account unlocked");
+    }
+
 }

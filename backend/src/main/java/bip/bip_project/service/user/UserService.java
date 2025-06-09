@@ -1,5 +1,6 @@
 package bip.bip_project.service.user;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import bip.bip_project.exception.user.UserDtoException;
 import bip.bip_project.exception.user.UserNotFoundException;
 import bip.bip_project.exception.user.WeakPasswordException;
@@ -8,10 +9,13 @@ import bip.bip_project.model.user.UserMapper;
 import bip.bip_project.model.user.UserRequestDto;
 import bip.bip_project.model.user.UserResponseDto;
 import bip.bip_project.repository.user.IUserRepository;
+import bip.bip_project.service.telegramAlertService.TelegramAlertService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,22 +23,37 @@ import java.util.Optional;
 public class UserService implements IUserService{
     IUserRepository userRepository;
     UserMapper userMapper;
+    TelegramAlertService telegramAlertService;
+    BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(IUserRepository userRepository, UserMapper userMapper) {
+    public UserService(IUserRepository userRepository, UserMapper userMapper, TelegramAlertService telegramAlertService, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.telegramAlertService = telegramAlertService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public UserResponseDto createUserViaGoogle(UserRequestDto userRequestDto) {
+        User user = new User();
+        BeanUtils.copyProperties(userRequestDto, user, new String[] {"id"});
+        userRepository.save(user);
+        return userMapper.toDto(user);
     }
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
         String password = userRequestDto.getPassword();
 
-        if (password == null || !isPasswordStrong(password)) {
+        if ((password == null || !isPasswordStrong(password))) {
             throw new WeakPasswordException("Password must be at least 6 characters long and contain both letters and digits");
         }
 
         User user = new User();
         BeanUtils.copyProperties(userRequestDto, user, new String[] {"id"});
+
+        user.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
+
         userRepository.save(user);
         return userMapper.toDto(user);
     }
@@ -77,11 +96,30 @@ public class UserService implements IUserService{
     @Override
     public User identicateAndAuthenticate(String email, String password) {
         User user = getUserByEmail(email);
-        if (user.getPassword().equals(password)){
-            return user;
+        boolean success = passwordEncoder.matches(password, user.getPassword());
+
+        if (!success) {
+            int attempts = user.getFailedAttempts() + 1;
+            user.setFailedAttempts(attempts);
+            userRepository.save(user);
+
+            if (attempts >= 3) {
+                telegramAlertService.sendMessage(String.format("Пользователь %s (почта %s) ввел неправильный пароль %d раз(а) подряд",
+                        user.getUsername(), user.getEmail(), attempts));
+            }
+
+            throw new UserNotFoundException("identicate or authenticate failure: email or password incorrect");
         }
-        throw new UserNotFoundException("identicate or authenticate failure: email or password incorrect");
+
+        // если пароль верный — сбросить счётчик
+        if (user.getFailedAttempts() > 0) {
+            user.setFailedAttempts(0);
+            userRepository.save(user);
+        }
+
+        return user;
     }
+
 
     public User getUserById(Integer userId) {
         Optional<User> user = userRepository.findById(userId);
@@ -116,16 +154,48 @@ public class UserService implements IUserService{
     }
 
     @Override
+    @Secured("ROLE_ADMIN")
+    public List<UserResponseDto> getAllUsers() {
+        List<UserResponseDto> usersDto = new ArrayList<>();
+        for (User user : userRepository.findAll()){
+            usersDto.add(userMapper.toDto(user));
+        }
+        return usersDto;
+    }
+
+    @Override
     @Secured({"ROLE_USER", "ROLE_ADMIN"})
     public UserResponseDto updateUser(UserRequestDto userRequestDto) {
         if (userRequestDto.getId() == null) {
             throw new UserDtoException("Field 'id' is null");
         }
         User user = getUserById(userRequestDto.getId());
+
+        String currentPassword = user.getPassword();
+
         BeanUtils.copyProperties(userRequestDto, user, new String[] {"id", "email"});
+        user.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
         userRepository.save(user);
+
+        disablePasswordExpiredIfChanged(user, currentPassword, user.getPassword()); // Снимаем флаг если юзер обновил пароль
         return userMapper.toDto(user);
     }
+
+    void disablePasswordExpiredIfChanged(User user, String odlPassword, String newPassword){
+        if (!odlPassword.equals(newPassword)){
+            user.setPasswordExpired(false);
+        }
+        userRepository.save(user);
+    }
+
+    @Override
+    @Secured("ROLE_ADMIN")
+    public void setPasswordExpiredFlag(String email, boolean expired) {
+        User user = getUserByEmail(email);
+        user.setPasswordExpired(expired);
+        userRepository.save(user);
+    }
+
 
     @Override
     @Secured("ROLE_ADMIN")
@@ -133,5 +203,23 @@ public class UserService implements IUserService{
         if(userRepository.findById(userId).isEmpty())
             throw new UserNotFoundException("Not found user with such Id");
         userRepository.deleteById(userId);
+        telegramAlertService.sendMessage(String.format("Админ удалил аккаунт пользователя %s (почта: %s)", getUserById(userId).getUsername(), getUserById(userId).getEmail()));
     }
+
+    @Secured("ROLE_ADMIN")
+    public void lockUser(String email) {
+        User user = getUserByEmail(email);
+        user.setAccountLocked(true);
+        userRepository.save(user);
+        telegramAlertService.sendMessage(String.format("Пользователь %s (почта: %s) был заблокирован админом", user.getUsername(), user.getEmail()));
+    }
+
+    @Secured("ROLE_ADMIN")
+    public void unlockUser(String email) {
+        User user = getUserByEmail(email);
+        user.setAccountLocked(false);
+        userRepository.save(user);
+        telegramAlertService.sendMessage(String.format("Пользователь %s (почта: %s) был разблокирован админом", user.getUsername(), user.getEmail()));
+    }
+
 }

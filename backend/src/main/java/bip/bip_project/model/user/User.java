@@ -31,6 +31,16 @@ public class User {
     @Column(nullable = false)
     Boolean emailIsConfirmed = false;
 
+    @Column(name = "password_expired")
+    private boolean passwordExpired = false;
+
+    @Column(name = "account_is_locked")
+    private boolean accountLocked = false; // смотреть JwtRequestFilter.java
+
+    @Column(name = "failed_attempts")
+    private int failedAttempts = 0;
+
+
     @Column(nullable = false)
     String role;  // Заменено с List<String> на String
 
@@ -105,5 +115,37 @@ public class User {
 
     public void setCreatedViaGoogle(Boolean createdViaGoogle) {
         this.createdViaGoogle = createdViaGoogle;
+    }
+
+    public boolean isPasswordExpired() {
+        return passwordExpired;
+    }
+
+    public void setPasswordExpired(boolean passwordExpired) {
+        this.passwordExpired = passwordExpired;
+    }
+
+    public boolean isAccountLocked() {
+        return accountLocked;
+    }
+
+    public void setAccountLocked(boolean accountLocked) {
+        this.accountLocked = accountLocked;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+    }
+
+    public int getFailedAttempts() {
+        return failedAttempts;
+    }
+
+    public void setFailedAttempts(int failedAttempts) {
+        this.failedAttempts = failedAttempts;
     }
 }

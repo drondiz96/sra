@@ -65,7 +65,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     User user = userService.getUserByEmail(email);
 
-                    if (jwtUtil.validateToken(jwt, user)) {
+                    if (jwtUtil.validateToken(jwt, user) && !user.isAccountLocked()) {
                         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
                         UsernamePasswordAuthenticationToken authentication =
                                 new UsernamePasswordAuthenticationToken(email, null, authorities); // изменил с usr на email для более простого доступа к юзеру из контроллера
