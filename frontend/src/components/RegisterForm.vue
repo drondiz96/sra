@@ -72,7 +72,7 @@
           }
   
           // Отправка данных на бэкенд
-          const response = await fetch("http://reviewphoneserve:8080/users/createUser", {
+          const response = await fetch("/api/users/createUser", {
             method: "POST",
             headers: {
               "Content-Type": "application/json"

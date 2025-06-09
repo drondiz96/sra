@@ -14,7 +14,8 @@
       <UserProfileCard />
 
       <div class="reviews-grid">
-        <ReviewList :reviews="reviews" />
+        <ReviewList :reviews="reviews"
+          @refresh="fetchReviews" />
       </div>
     </div>
   </div>
@@ -57,7 +58,7 @@ const fetchReviews = async () => {
       params.append('filterType', 'DEVICE_TYPE')
       params.append('value', 'phone')
     }
-    const url = `http://reviewphoneserve:8080/reviews/filter?${params.toString()}`
+    const url = `/api/reviews/filter?${params.toString()}`
     console.log(`📡 Запрос к API: ${url}`)
 
     const response = await fetch(url, {

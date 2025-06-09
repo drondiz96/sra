@@ -139,7 +139,7 @@ const submitReview = async () => {
     }
 
     const method = editingReview.value ? 'PUT' : 'POST'
-    const url = 'http://reviewphoneserve:8080/reviews/'
+    const url = '/api/reviews/'
     const response = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
@@ -161,7 +161,7 @@ const submitReview = async () => {
 const deleteReview = async (id) => {
   if (!confirm('Удалить смартфон?')) return
   try {
-    const response = await fetch(`http://reviewphoneserve:8080/reviews/${id}`, {
+    const response = await fetch(`/api/reviews/${id}`, {
       method: 'DELETE',
       credentials: 'include'
     })

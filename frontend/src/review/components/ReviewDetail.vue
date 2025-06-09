@@ -83,7 +83,7 @@ const review = ref(null)
 
 const fetchReview = async () => {
   try {
-    const response = await fetch(`http://reviewphoneserve:8080/reviews/${route.params.id}`, {
+    const response = await fetch(`/api/reviews/${route.params.id}`, {
       method: 'GET',
       credentials: 'include'
     })

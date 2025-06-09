@@ -39,9 +39,13 @@ const routes = [
   },
   {
     path: '/user/me',
-    //path: '/user/:username',
     name: 'UserPage',
     component: () => import('@/views/UserPage.vue'),
+  },
+  {
+    path: '/admin',
+    name: 'AdminActionsPanel',
+    component: () => import('@/views/AdminActionsPanel.vue'),
   }
 ];
 
