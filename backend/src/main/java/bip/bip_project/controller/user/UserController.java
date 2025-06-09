@@ -70,7 +70,7 @@ public class UserController {
 
         if (twoFactorAuthService.verifyCode(email, code)) {
             userService.confirmEmail(email);
-            return ResponseEntity.ok(userService.getUserByEmail(email));
+            return ResponseEntity.ok(userService.getUserDtoByEmail(Map.of("email", email)));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid 2FA code");
         }
