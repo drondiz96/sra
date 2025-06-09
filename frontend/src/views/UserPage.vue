@@ -68,7 +68,7 @@ async function changePassword() {
       body: JSON.stringify({
         id: parseInt(id.value),
         username: username.value,
-        role: 'user', // если нужно, замени на нужную роль
+        role: 'ROLE_USER', // если нужно, замени на нужную роль
         password: newPassword.value,
         email: email.value,
       }),
