@@ -28,11 +28,19 @@ public class UserService implements IUserService{
     }
 
     @Override
+    public UserResponseDto createUserViaGoogle(UserRequestDto userRequestDto) {
+        User user = new User();
+        BeanUtils.copyProperties(userRequestDto, user, new String[] {"id"});
+        userRepository.save(user);
+        return userMapper.toDto(user);
+    }
+
+    @Override
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
         String password = userRequestDto.getPassword();
 
-        if (password == null || !isPasswordStrong(password)) {
-            // throw new WeakPasswordException("Password must be at least 6 characters long and contain both letters and digits");
+        if ((password == null || !isPasswordStrong(password))) {
+            throw new WeakPasswordException("Password must be at least 6 characters long and contain both letters and digits");
         }
 
         User user = new User();

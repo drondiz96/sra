@@ -37,7 +37,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         try {
             userService.getUserByEmail(email);
         } catch (UserNotFoundException ex) {
-            userService.createUser(new UserRequestDto(name, "ROLE_USER", null, email));
+            userService.createUserViaGoogle(new UserRequestDto(name, "ROLE_USER", null, email));
             userService.setCreateViaGoogle(email);  // устанавливаем что акк создан через Google
             userService.confirmEmail(email);
         }
@@ -50,7 +50,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         cookie.setHttpOnly(true);
         cookie.setSecure(false); // Необходимо поставить true в проде для HTTPS
         cookie.setPath("/"); // Означает что браузер будет прикреплять этот cookie ко всем HTTP-запросам, отправляемым на этот домен, вне зависимости от пути
-        cookie.setMaxAge(60 * 60 * 2); // на 2 часика
+        cookie.setMaxAge(60 * 60 * 2); // на 2 часа
         response.addCookie(cookie);
 
         // Редирект на фронт

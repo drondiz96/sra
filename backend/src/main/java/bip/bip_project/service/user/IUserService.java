@@ -10,6 +10,7 @@ import java.util.Map;
 public interface IUserService {
     // create
     UserResponseDto createUser(UserRequestDto userRequestDto);
+    UserResponseDto createUserViaGoogle(UserRequestDto userRequestDto);
     void saveUser(User user);
 
     // confirm
