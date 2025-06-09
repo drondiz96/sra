@@ -9,33 +9,18 @@
       </div>
     </div>
 
-    <!-- <div class="user-section">
-      <h2>Мои обзоры</h2>
-      <div class="section-content">
-        <p>Здесь будут ваши обзоры.</p>
-      </div>
-    </div>
-
+    <!-- Форма смены пароля -->
     <div class="user-section">
-      <h2>Мои комментарии</h2>
-      <div class="section-content">
-        <p>Здесь будут ваши комментарии.</p>
-      </div>
+      <h2>Сменить пароль</h2>
+      <input
+        v-model="newPassword"
+        type="password"
+        placeholder="Новый пароль"
+        class="password-input"
+      />
+      <button @click="changePassword" class="submit-button">Сменить</button>
+      <p v-if="message" class="message">{{ message }}</p>
     </div>
-
-    <div class="user-section">
-      <h2>Избранные обзоры</h2>
-      <div class="section-content">
-        <p>Здесь будут избранные обзоры.</p>
-      </div>
-    </div>
-
-    <div class="user-section">
-      <h2>Избранные телефоны</h2>
-      <div class="section-content">
-        <p>Здесь будут избранные телефоны.</p>
-      </div>
-    </div> -->
   </div>
 </template>
 
@@ -53,6 +38,9 @@ const id = ref(0)
 const email = ref('Guest@guest.com')
 const avatar = ref(defaultAvatar)
 
+const newPassword = ref('')
+const message = ref('')
+
 onMounted(() => {
   const idCookie = getCookie('userId')
   const usernameCookie = getCookie('username')
@@ -64,6 +52,39 @@ onMounted(() => {
   if (emailCookie) email.value = emailCookie
   if (avatarCookie) avatar.value = avatarCookie
 })
+
+async function changePassword() {
+  if (!newPassword.value) {
+    message.value = 'Введите новый пароль.'
+    return
+  }
+
+  try {
+    const response = await fetch('http://reviewphoneserve:8080/users/', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json', // указываем, что отправляем JSON     
+      },
+      body: JSON.stringify({
+        id: parseInt(id.value),
+        username: username.value,
+        role: 'user', // если нужно, замени на нужную роль
+        password: newPassword.value,
+        email: email.value,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error('Ошибка при отправке запроса')
+    }
+
+    message.value = 'Пароль успешно изменён!'
+    newPassword.value = ''
+  } catch (err) {
+    console.error(err)
+    message.value = 'Ошибка при смене пароля.'
+  }
+}
 </script>
 
 <style scoped>
@@ -102,24 +123,6 @@ onMounted(() => {
   color: #888;
 }
 
-.user-section {
-  background: #fafafa;
-  border-radius: 8px;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-}
-
-.user-section h2 {
-  margin-bottom: 1rem;
-  font-size: 1.25rem;
-  color: #333;
-}
-
-.section-content {
-  color: #555;
-  font-size: 0.95rem;
-}
-
 .user-info p {
   margin: 4px 0;
   font-size: 1rem;
@@ -129,7 +132,41 @@ onMounted(() => {
 .user-info p.email {
   font-style: italic;
   color: #3b82f6;
-  word-break: break-all;
+  word-break: break-word;
 }
 
+.user-section {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.password-input {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.submit-button {
+  padding: 0.6rem 1.2rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.submit-button:hover {
+  background-color: #2563eb;
+}
+
+.message {
+  font-size: 0.95rem;
+  color: green;
+}
 </style>

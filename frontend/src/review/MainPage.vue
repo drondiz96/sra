@@ -14,7 +14,8 @@
       <UserProfileCard />
 
       <div class="reviews-grid">
-        <ReviewList :reviews="reviews" />
+        <ReviewList :reviews="reviews"
+          @refresh="fetchReviews" />
       </div>
     </div>
   </div>
