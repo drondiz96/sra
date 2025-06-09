@@ -58,7 +58,7 @@ services:
       context: ./captcha-service
       dockerfile: Dockerfile
     ports:
-      - "33001:3001"
+      - "33001:33001"
     restart: unless-stopped
 
 
