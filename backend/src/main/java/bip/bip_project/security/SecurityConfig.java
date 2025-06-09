@@ -32,13 +32,37 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().authorizeRequests().antMatchers(createUserPath, authenticatePath, verify2faPath, createUserVerify2fa).permitAll()
-                .anyRequest().authenticated()
-                //.anyRequest().permitAll()
-                .and()
-                    .oauth2Login().successHandler(customOAuth2SuccessHandler)
-                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+        http.csrf().disable()
+                .authorizeRequests()
+                // Публичные эндпоинты (регистрация и 2FA)
+                .antMatchers(
+                        "/users/createUser",
+                        "/users/authenticate",
+                        "/users/authenticate/auth-verify-2fa",
+                        "/users/createUser/register-verify-email"
+                ).permitAll()
 
+                // Swagger — только для ROLE_ADMIN
+                .antMatchers(
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**"
+                ).hasRole("ADMIN")
+
+                // Остальное — требует аутентификации
+                .anyRequest().authenticated()
+                .and()
+
+                // OAuth2 логин и success handler
+                .oauth2Login()
+                .successHandler(customOAuth2SuccessHandler)
+                .and()
+
+                // Сессия создаётся только при необходимости (для OAuth2)
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+
+        // Добавление фильтра JWT до стандартного UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
+
 }
