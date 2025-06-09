@@ -51,7 +51,17 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - PIP_NO_CACHE_DIR=on
-      
+  
+
+  captcha_server:
+    build:
+      context: ./captcha-service
+      dockerfile: Dockerfile
+    ports:
+      - "33001:3001"
+    restart: unless-stopped
+
+
 volumes:
   postgres_data:  # Определяем том для хранения данных
 
