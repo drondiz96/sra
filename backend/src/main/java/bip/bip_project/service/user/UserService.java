@@ -1,5 +1,6 @@
 package bip.bip_project.service.user;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import bip.bip_project.exception.user.UserDtoException;
 import bip.bip_project.exception.user.UserNotFoundException;
 import bip.bip_project.exception.user.WeakPasswordException;
@@ -23,11 +24,13 @@ public class UserService implements IUserService{
     IUserRepository userRepository;
     UserMapper userMapper;
     TelegramAlertService telegramAlertService;
+    BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(IUserRepository userRepository, UserMapper userMapper, TelegramAlertService telegramAlertService) {
+    public UserService(IUserRepository userRepository, UserMapper userMapper, TelegramAlertService telegramAlertService, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.telegramAlertService = telegramAlertService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -48,6 +51,9 @@ public class UserService implements IUserService{
 
         User user = new User();
         BeanUtils.copyProperties(userRequestDto, user, new String[] {"id"});
+
+        user.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
+
         userRepository.save(user);
         return userMapper.toDto(user);
     }
@@ -90,8 +96,9 @@ public class UserService implements IUserService{
     @Override
     public User identicateAndAuthenticate(String email, String password) {
         User user = getUserByEmail(email);
+        boolean success = passwordEncoder.matches(password, user.getPassword());
 
-        if (!user.getPassword().equals(password)) {
+        if (!success) {
             int attempts = user.getFailedAttempts() + 1;
             user.setFailedAttempts(attempts);
             userRepository.save(user);
@@ -167,6 +174,7 @@ public class UserService implements IUserService{
         String currentPassword = user.getPassword();
 
         BeanUtils.copyProperties(userRequestDto, user, new String[] {"id", "email"});
+        user.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
         userRepository.save(user);
 
         disablePasswordExpiredIfChanged(user, currentPassword, user.getPassword()); // Снимаем флаг если юзер обновил пароль
