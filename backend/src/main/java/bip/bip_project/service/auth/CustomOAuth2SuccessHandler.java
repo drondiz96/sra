@@ -55,6 +55,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         // Редирект на фронт
         // response.sendRedirect("http://localhost:8080/swagger-ui/index.html");
-        response.sendRedirect("http://localhost:8081/reviews");
+        response.sendRedirect("https://reviewphoneserve/");
     }
 }
