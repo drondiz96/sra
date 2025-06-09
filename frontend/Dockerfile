@@ -1,39 +1,30 @@
 # Этап сборки
 FROM node:16 as build-stage
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
-
-# Копируем package.json и package-lock.json
 COPY package*.json ./
-
-# Устанавливаем зависимости
 RUN npm install
-
-# Копируем исходный код
 COPY . .
+RUN npm run build
 
-# Аргумент для выбора режима сборки
-ARG MODE=prod
-
-# Сборка приложения
-RUN if [ "$MODE" = "dev" ]; then \
-     npm run serve; \
-    else \
-      npm run build; \
-    fi
-
-# Этап запуска
+# Этап продакшена
 FROM nginx:alpine as production-stage
 
-# Копируем собранные файлы
+# Генерируем SSL-сертификат во время билда
+RUN apk add --no-cache openssl && \
+    mkdir -p /etc/nginx/ssl && \
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/nginx/ssl/selfsigned.key \
+        -out /etc/nginx/ssl/selfsigned.crt \
+        -subj "/CN=localhost"
+
+# Копируем собранное Vue-приложение
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 
-# Копируем конфигурацию Nginx
+# Копируем конфиг NGINX
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Открываем порт 80
 EXPOSE 80
+EXPOSE 443
 
-# Запускаем Nginx
 CMD ["nginx", "-g", "daemon off;"]

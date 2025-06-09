@@ -55,7 +55,7 @@ const newComment = ref('')
 
 const fetchComments = async () => {
   try {
-    const response = await fetch(`http://reviewphoneserve:8080/comments/by-review/${route.params.id}`, {
+    const response = await fetch(`/api/comments/by-review/${route.params.id}`, {
       method: 'GET',
       credentials: 'include'
     })
@@ -78,7 +78,7 @@ const handleAddComment = async () => {
   if (!newComment.value.trim()) return
 
   try {
-    const response = await fetch(`http://reviewphoneserve:8080/comments/${route.params.id}`, {
+    const response = await fetch(`/api/comments/${route.params.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

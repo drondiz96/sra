@@ -75,7 +75,7 @@ export default {
     async fetchUsers() {
       try {
         console.debug("GET /users/all");
-        const res = await fetch("http://reviewphoneserve:8080/users/all", {
+        const res = await fetch("/api/users/all", {
           credentials: "include",
         });
         console.debug("Response status:", res.status);
@@ -101,7 +101,7 @@ export default {
     async disableUser(email) {
       console.debug("POST /users/lock", { email });
       try {
-        const res = await fetch("http://reviewphoneserve:8080/users/lock", {
+        const res = await fetch("/api/users/lock", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -119,7 +119,7 @@ export default {
     async unlockUser(email) {
       console.debug("POST /users/unlock", { email });
       try {
-        const res = await fetch("http://reviewphoneserve:8080/users/unlock", {
+        const res = await fetch("/api/users/unlock", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -138,7 +138,7 @@ export default {
       const payload = { email, expired: "true" };
       console.debug("POST /users/set-password-expired (deactivate sessions)", payload);
       try {
-        const res = await fetch("http://reviewphoneserve:8080/users/set-password-expired", {
+        const res = await fetch("/api/users/set-password-expired", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -157,7 +157,7 @@ export default {
       const payload = { email, expired: "true" };
       console.debug("POST /users/set-password-expired (request password reset)", payload);
       try {
-        const res = await fetch("http://reviewphoneserve:8080/users/set-password-expired", {
+        const res = await fetch("/api/users/set-password-expired", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",

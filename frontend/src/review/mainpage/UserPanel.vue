@@ -72,7 +72,7 @@ const user = ref({
 
 const logout = async () => {
 
-    const response = await fetch(`http://reviewphoneserve:8080/users/logout`, {
+    const response = await fetch(`/api/users/logout`, {
       method: 'POST',
       credentials: 'include'
     })
@@ -119,7 +119,7 @@ async function fetchCurrentUser() {
     }
 
     // Делаем запрос через fetch
-    const response = await fetch(`http://reviewphoneserve:8080/users/${userId}`, {
+    const response = await fetch(`/api/users/${userId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -60,7 +60,7 @@ async function changePassword() {
   }
 
   try {
-    const response = await fetch('http://reviewphoneserve:8080/users/', {
+    const response = await fetch('/api/users/', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json', // указываем, что отправляем JSON     
