@@ -15,6 +15,7 @@ public class BipProjectApplication {
 		System.setProperty("MAIL_PASSWORD", dotenv.get("MAIL_PASSWORD"));
 		System.setProperty("CLIENT_ID", dotenv.get("CLIENT_ID"));
 		System.setProperty("CLIENT_SECRET", dotenv.get("CLIENT_SECRET"));
+		System.setProperty("TELEGRAM_BOT_TOKEN", dotenv.get("TELEGRAM_BOT_TOKEN"));
 
 		// System.out.println("MAIL_USERNAME: " + System.getProperty("MAIL_USERNAME"));
 		// System.out.println("MAIL_PASSWORD: " + System.getProperty("MAIL_PASSWORD"));

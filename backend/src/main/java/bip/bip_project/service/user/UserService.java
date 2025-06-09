@@ -8,6 +8,7 @@ import bip.bip_project.model.user.UserMapper;
 import bip.bip_project.model.user.UserRequestDto;
 import bip.bip_project.model.user.UserResponseDto;
 import bip.bip_project.repository.user.IUserRepository;
+import bip.bip_project.service.telegramAlertService.TelegramAlertService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
@@ -21,10 +22,12 @@ import java.util.Optional;
 public class UserService implements IUserService{
     IUserRepository userRepository;
     UserMapper userMapper;
+    TelegramAlertService telegramAlertService;
 
-    public UserService(IUserRepository userRepository, UserMapper userMapper) {
+    public UserService(IUserRepository userRepository, UserMapper userMapper, TelegramAlertService telegramAlertService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.telegramAlertService = telegramAlertService;
     }
 
     @Override
@@ -87,11 +90,29 @@ public class UserService implements IUserService{
     @Override
     public User identicateAndAuthenticate(String email, String password) {
         User user = getUserByEmail(email);
-        if (user.getPassword().equals(password)){
-            return user;
+
+        if (!user.getPassword().equals(password)) {
+            int attempts = user.getFailedAttempts() + 1;
+            user.setFailedAttempts(attempts);
+            userRepository.save(user);
+
+            if (attempts >= 3) {
+                telegramAlertService.sendMessage(String.format("Пользователь %s (почта %s) ввел неправильный пароль %d раз(а) подряд",
+                        user.getUsername(), user.getEmail(), attempts));
+            }
+
+            throw new UserNotFoundException("identicate or authenticate failure: email or password incorrect");
         }
-        throw new UserNotFoundException("identicate or authenticate failure: email or password incorrect");
+
+        // если пароль верный — сбросить счётчик
+        if (user.getFailedAttempts() > 0) {
+            user.setFailedAttempts(0);
+            userRepository.save(user);
+        }
+
+        return user;
     }
+
 
     public User getUserById(Integer userId) {
         Optional<User> user = userRepository.findById(userId);
@@ -174,6 +195,7 @@ public class UserService implements IUserService{
         if(userRepository.findById(userId).isEmpty())
             throw new UserNotFoundException("Not found user with such Id");
         userRepository.deleteById(userId);
+        telegramAlertService.sendMessage(String.format("Админ удалил аккаунт пользователя %s (почта: %s)", getUserById(userId).getUsername(), getUserById(userId).getEmail()));
     }
 
     @Secured("ROLE_ADMIN")
@@ -181,6 +203,7 @@ public class UserService implements IUserService{
         User user = getUserByEmail(email);
         user.setAccountLocked(true);
         userRepository.save(user);
+        telegramAlertService.sendMessage(String.format("Пользователь %s (почта: %s) был заблокирован админом", user.getUsername(), user.getEmail()));
     }
 
     @Secured("ROLE_ADMIN")
@@ -188,6 +211,7 @@ public class UserService implements IUserService{
         User user = getUserByEmail(email);
         user.setAccountLocked(false);
         userRepository.save(user);
+        telegramAlertService.sendMessage(String.format("Пользователь %s (почта: %s) был разблокирован админом", user.getUsername(), user.getEmail()));
     }
 
 }

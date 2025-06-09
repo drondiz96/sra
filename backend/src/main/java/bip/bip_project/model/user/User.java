@@ -37,6 +37,10 @@ public class User {
     @Column(name = "account_is_locked")
     private boolean accountLocked = false; // смотреть JwtRequestFilter.java
 
+    @Column(name = "failed_attempts")
+    private int failedAttempts = 0;
+
+
     @Column(nullable = false)
     String role;  // Заменено с List<String> на String
 
@@ -135,5 +139,13 @@ public class User {
 
     public void setReviews(List<Review> reviews) {
         this.reviews = reviews;
+    }
+
+    public int getFailedAttempts() {
+        return failedAttempts;
+    }
+
+    public void setFailedAttempts(int failedAttempts) {
+        this.failedAttempts = failedAttempts;
     }
 }
