@@ -10,6 +10,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 
+import javax.servlet.http.HttpServletResponse;
+
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
@@ -32,9 +34,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http
+                .csrf().disable()
+
+                // Ручная обработка ошибок — не редиректим на /login при 403/401
+                .exceptionHandling()
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+                })
+                .and()
+
+                // Настройка прав доступа
                 .authorizeRequests()
-                // Публичные эндпоинты (регистрация и 2FA)
                 .antMatchers(
                         "/users/createUser",
                         "/users/authenticate",
@@ -42,27 +56,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/users/createUser/register-verify-email"
                 ).permitAll()
 
-                // Swagger — только для ROLE_ADMIN
                 .antMatchers(
                         "/swagger-ui/**",
                         "/v3/api-docs/**"
                 ).hasRole("ADMIN")
 
-                // Остальное — требует аутентификации
                 .anyRequest().authenticated()
                 .and()
 
-                // OAuth2 логин и success handler
+                // OAuth2 логика — используется только при отсутствии JWT
                 .oauth2Login()
                 .successHandler(customOAuth2SuccessHandler)
                 .and()
 
-                // Сессия создаётся только при необходимости (для OAuth2)
+                // Сессии нужны только для OAuth
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
 
-        // Добавление фильтра JWT до стандартного UsernamePasswordAuthenticationFilter
+        // JWT фильтр — обрабатывает все запросы ДО UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
+
 
 }
