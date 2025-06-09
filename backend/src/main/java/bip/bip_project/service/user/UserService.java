@@ -142,9 +142,21 @@ public class UserService implements IUserService{
             throw new UserDtoException("Field 'id' is null");
         }
         User user = getUserById(userRequestDto.getId());
+
+        String currentPassword = user.getPassword();
+
         BeanUtils.copyProperties(userRequestDto, user, new String[] {"id", "email"});
         userRepository.save(user);
+
+        disablePasswordExpiredIfChanged(user, currentPassword, user.getPassword()); // Снимаем флаг если юзер обновил пароль
         return userMapper.toDto(user);
+    }
+
+    void disablePasswordExpiredIfChanged(User user, String odlPassword, String newPassword){
+        if (!odlPassword.equals(newPassword)){
+            user.setPasswordExpired(false);
+        }
+        userRepository.save(user);
     }
 
     @Override
