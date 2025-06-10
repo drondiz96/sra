@@ -13,6 +13,8 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class ExternalReviewService implements IExternalReviewService {
@@ -59,6 +61,26 @@ public class ExternalReviewService implements IExternalReviewService {
             er.setUrl((String) data.get("url"));
             er.setPriority((String) data.get("priority"));
             er.setSummary((String) data.get("summary"));
+
+            Object consRaw = data.get("cons");
+            if (consRaw instanceof List<?>) {
+                List<String> cons = ((List<?>) consRaw).stream()
+                        .filter(Objects::nonNull)
+                        .map(Object::toString)
+                        .collect(Collectors.toList());
+                er.setCons(cons);
+            }
+
+            Object prosRaw = data.get("pros");
+            if (prosRaw instanceof List<?>) {
+                List<String> pros = ((List<?>) prosRaw).stream()
+                        .filter(Objects::nonNull)
+                        .map(Object::toString)
+                        .collect(Collectors.toList());
+                er.setPros(pros);
+            }
+
+
             er.setRecommendation((String) data.get("recommendation"));
             String retrievedAtRaw = ((String) data.get("retrieved_at"));
             if (retrievedAtRaw != null) {

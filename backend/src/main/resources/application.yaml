@@ -59,5 +59,3 @@ management:
 telegram:
   bot:
     token: ${TELEGRAM_BOT_TOKEN}
-  chat:
-    id: 1202111163

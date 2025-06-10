@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "external_reviews")
@@ -27,6 +28,12 @@ public class ExternalReview {
     private String date;
     private String source;
     private String url;
+    @ElementCollection
+    private List<String> pros;
+
+    @ElementCollection
+    private List<String> cons;
+
 
     private OffsetDateTime retrievedAt;
 
@@ -131,5 +138,21 @@ public class ExternalReview {
 
     public void setRecommendation(String recommendation) {
         this.recommendation = recommendation;
+    }
+
+    public List<String> getPros() {
+        return pros;
+    }
+
+    public void setPros(List<String> pros) {
+        this.pros = pros;
+    }
+
+    public List<String> getCons() {
+        return cons;
+    }
+
+    public void setCons(List<String> cons) {
+        this.cons = cons;
     }
 }
