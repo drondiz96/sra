@@ -1,0 +1,13 @@
+modules:
+  http_2xx:
+    prober: http
+    http:
+      preferred_ip_protocol: "ip4"
+      tls_config:
+        insecure_skip_verify: false  # Проверять SSL сертификаты
+  http_2xx_insecure:
+    prober: http
+    http:
+      preferred_ip_protocol: "ip4"
+      tls_config:
+        insecure_skip_verify: true  # Для сайтов с самоподписанными сертификатами

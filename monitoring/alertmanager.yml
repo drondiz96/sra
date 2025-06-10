@@ -1,0 +1,36 @@
+# monitoring/alertmanager.yml
+global:
+  # разрешаем разрешать упавшие уведомления, если тревога вернулась в норму
+  resolve_timeout: 5m
+
+route:
+  # корневой маршрут: все тревоги попадут к получателю "telegram"
+  receiver: "telegram"
+  group_by: ["alertname", "groupname"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+
+receivers:
+  - name: "telegram"
+    telegram_configs:
+      - send_resolved: true
+        bot_token: "8129820799:AAFTJiV73WehegZyUCQGtjAapGrGEPcgloA"
+        chat_id: 1202111163
+        message: |
+          🚨 *{{ .Status | toUpper }}*: {{ .CommonAnnotations.summary }}
+          • {{ .CommonAnnotations.description }}
+
+      - send_resolved: true
+        bot_token: "8129820799:AAFTJiV73WehegZyUCQGtjAapGrGEPcgloA"
+        chat_id: 446780363
+        message: |
+          🚨 *{{ .Status | toUpper }}*: {{ .CommonAnnotations.summary }}
+          • {{ .CommonAnnotations.description }}
+
+      - send_resolved: true
+        bot_token: "8129820799:AAFTJiV73WehegZyUCQGtjAapGrGEPcgloA"
+        chat_id: 906737008
+        message: |
+          🚨 *{{ .Status | toUpper }}*: {{ .CommonAnnotations.summary }}
+          • {{ .CommonAnnotations.description }}

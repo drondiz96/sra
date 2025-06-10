@@ -1,32 +1,31 @@
+version: '3.8'
+
 services:
   postgresql:
     build:
       context: ./backend
-      dockerfile: Dockerfile.postgres  # Обновленное имя файла Dockerfile
-    container_name: postgresql  # Имя контейнера
+      dockerfile: Dockerfile.postgres
+    container_name: postgresql
     restart: "no"
-
     environment:
-      POSTGRES_USER: develop  # Имя пользователя БД
-      POSTGRES_PASSWORD: develop  # Пароль пользователя
-      POSTGRES_DB: bip  # Имя создаваемой БД
-
+      POSTGRES_USER: develop
+      POSTGRES_PASSWORD: develop
+      POSTGRES_DB: bip
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # Сохраняем данные БД вне контейнера
-
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"  # Пробрасываем порт PostgreSQL (локальный 5433 → контейнерный 5432)
+      - "5433:5432"
 
   bip_app:
     build:
       context: ./backend
-      dockerfile: Dockerfile.app  # Используем Dockerfile.app для сборки
+      dockerfile: Dockerfile.app
     container_name: bip_app
     restart: "no"
     depends_on:
-      - postgresql  # Приложение зависит от базы данных
+      - postgresql
     ports:
-      - "8080:8080"  # Пробрасываем порт приложения
+      - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/bip
       SPRING_DATASOURCE_USERNAME: develop
@@ -35,39 +34,76 @@ services:
   frontend:
     build:
       context: ./frontend
-    ports:
-      # - "8090:80"
-      - "80:80"
-      - "443:443"
     container_name: front
     restart: unless-stopped
-  
+    ports:
+      - "80:80"
+      - "443:443"
+
   ml-service:
     build:
       context: ./ml-service
       dockerfile: Dockerfile
+    container_name: ml-service
+    restart: unless-stopped
     ports:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
       - PIP_NO_CACHE_DIR=on
-  
 
   captcha_server:
     build:
       context: ./captcha-service
       dockerfile: Dockerfile
+    container_name: captcha_server
+    restart: unless-stopped
     ports:
       - "33001:33001"
-    restart: unless-stopped
 
-  node_exporter:
-    image: prom/node-exporter:latest
-    container_name: node_exporter
+  # Monitoring stack
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
     restart: unless-stopped
-    # убрали network_mode: host и pid: host
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro 
     ports:
-      - "9100:9100"    # проброс метрик наружу
+      - "9090:9090"
+    depends_on:
+      - node-exporter
+      - cadvisor
+      - process-exporter
+
+    networks:
+      - monitoring
+      
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      - "GF_SECURITY_ADMIN_PASSWORD=admin"
+      - "GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s"
+      - "GF_AUTH_ANONYMOUS_ENABLED=true"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "33000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+  node-exporter:    
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -76,66 +112,55 @@ services:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev)($|/)"'
+    networks:
+      - monitoring
 
-  # cAdvisor для детального мониторинга контейнеров и процессов
   cadvisor:
-    image: gcr.io/google-containers/cadvisor:latest
-    container_name: cadvisor
-    restart: unless-stopped
-    ports:
-      - "8082:8080"    # проброс метрик cAdvisor
+    image: gcr.io/cadvisor/cadvisor:latest
     volumes:
       - /:/rootfs:ro
-      - /var/run:/var/run:ro
+      - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-
-  # Prometheus
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    restart: unless-stopped
     ports:
-      - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-
-  # Grafana
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
+      - "8081:8080"
     restart: unless-stopped
-    ports:
-      - "33000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=secret
-    volumes:
-      - grafana_data:/var/lib/grafana
-  process_exporter:
+    networks:
+      - monitoring
+
+
+
+      
+  process-exporter:
     image: ncabatoff/process-exporter:latest
-    container_name: process_exporter
+    container_name: process-exporter
     restart: unless-stopped
+    # монтируем procfs, чтобы exporter видел процессы на хосте
     volumes:
       - /proc:/host/proc:ro
-      - ./monitoring/processes.yml:/config/processes.yml:ro
+      - ./monitoring/process-exporter.yml:/etc/process-exporter/config.yml:ro
     command:
-      - '--procfs=/host/proc'
-      - '--config.path=/config/processes.yml'
+      - '-config.path=/etc/process-exporter/config.yml'
+      - '-web.listen-address=:9256'
     ports:
       - "9256:9256"
+    networks:
+      - monitoring
 
-  docker_exporter:
-    image: prometheuscommunity/docker-engine-exporter:latest
-    container_name: docker_exporter
-    restart: unless-stopped
-    ports:
-      - "9323:9323"
+  alertmanager:
+    image: prom/alertmanager:latest
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro  
+    ports:
+      - "9093:9093"
+    networks:
+      - monitoring
+
 
 volumes:
-  postgres_data:  # Определяем том для хранения данных
+  postgres_data:
   grafana_data:
 
+networks:
+  monitoring:
+    driver: bridge
