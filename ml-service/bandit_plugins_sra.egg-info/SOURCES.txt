@@ -1,0 +1,10 @@
+pyproject.toml
+bandit_plugins/__init__.py
+bandit_plugins/print_secret.py
+bandit_plugins/ssl_false_aiohttp.py
+bandit_plugins_sra.egg-info/PKG-INFO
+bandit_plugins_sra.egg-info/SOURCES.txt
+bandit_plugins_sra.egg-info/dependency_links.txt
+bandit_plugins_sra.egg-info/entry_points.txt
+bandit_plugins_sra.egg-info/requires.txt
+bandit_plugins_sra.egg-info/top_level.txt

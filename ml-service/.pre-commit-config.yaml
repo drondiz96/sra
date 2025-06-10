@@ -1,0 +1,14 @@
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/PyCQA/bandit
+    rev: "latest"
+    hooks:
+      - id: bandit
+        name: bandit-security
+        args:
+          - "-c"
+          - "bandit.yaml"
+          - "-r"
+          - "."
+        additional_dependencies:
+          - "aiohttp"          # чтобы plugin видел AST имён

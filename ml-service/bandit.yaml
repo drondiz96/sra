@@ -1,0 +1,49 @@
+
+exclude_dirs:
+  - .venv          # или venv / env — как у вас называется
+  - __pycache__
+
+# Определяем уровень серьезности для выдаваемых предупреждений
+severity:
+  low: false
+  medium: true
+  high: true
+  critical: true
+
+plugins:
+  - bandit_plugins.ssl_false_aiohttp:aiohttp_ssl_false
+  - bandit_plugins.print_secret:print_secret
+  - bandit.builtins          # встроенные правила
+  - bandit.imports
+  - bandit.crypto
+
+# Указываем, какие конкретные уязвимости проверять
+tests:
+  - 'B101'  # Не проверяем на использование eval
+  - 'B102'  # Не проверяем на использование exec
+  - 'B101'      # assert_used
+  - 'B110'      # try/except/pass
+  - 'B112'      # try/except/continue
+  - 'B201'      # flask_debug_true
+  - 'B301'      # pickle
+  - 'B303'      # md5
+  - 'B310'      # audit_url_open
+  - 'B501'      # requests_no_cert_validation
+  - 'B502'      # ssl_no_cert_validation
+  - 'B506'      # yaml_load
+  - 'B602'      # subprocess_popen_with_shell_equals_true
+  - 'B603'      # subprocess_without_shell_equals_true
+  - 'B604'      # subprocess_without_shell_equals_true
+  - 'B605'      # start_process_with_shell
+  - 'B606'      # start_process_with_pipe
+  - 'B104'
+  # ── наши кастом-правила ───────────────────────────────────────────
+  - 'X101'     # aiohttp_ssl_false
+  - 'X102'     # print_secret_like_value
+
+  # где искать сторонние плагины
+plugins_dir: "./bandit_plugins"
+
+# Настройки для формирования отчетов
+output:
+  format: text  # Формат вывода (можно использовать json, html и т.д.)

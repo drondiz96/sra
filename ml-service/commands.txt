@@ -1,3 +1,4 @@
 docker logs -f reviews-api - Проверить логи контейнера
 docker stop reviews-api - остановка
 docker build --no-cache -t reviews-api:latest . - пересборка решения
+bandit -c bandit.yaml -r .- заработают X101, X102 и остальные выбранные правила,
