@@ -32,13 +32,16 @@ public class ExternalReviewService implements IExternalReviewService {
     public List<ExternalReview> fetchAndSaveExternalReviews(Review review) {
         // Параметры запроса берём из устройства
         String brand = review.getDevice().getManufacturer();
-        String model = review.getDevice().getModel();
+        String model = review.getDevice().getModel().replace(" ", "+");
 
         String url = UriComponentsBuilder.fromHttpUrl(externalReviewBaseUrl + "/api/reviews")
                 .queryParam("brand", brand)
                 .queryParam("model", model)
                 .queryParam("language", "ru")
                 .toUriString();
+
+        // Печать финального URL в консоль
+        System.out.println(">>> Внешний HTTP-запрос к нейросервису: " + url);
 
         ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
 
@@ -50,13 +53,14 @@ public class ExternalReviewService implements IExternalReviewService {
             ExternalReview er = new ExternalReview();
             er.setTitle((String) data.get("title"));
             er.setContent((String) data.get("content"));
-            er.setPros((String) data.get("pros"));
-            er.setCons((String) data.get("cons"));
             er.setAuthor((String) data.get("author"));
             er.setDate((String) data.get("date"));
             er.setSource((String) data.get("source"));
             er.setUrl((String) data.get("url"));
-            String retrievedAtRaw = (String) data.get("retrieved_at");
+            er.setPriority((String) data.get("priority"));
+            er.setSummary((String) data.get("summary"));
+            er.setRecommendation((String) data.get("recommendation"));
+            String retrievedAtRaw = ((String) data.get("retrieved_at"));
             if (retrievedAtRaw != null) {
                 er.setRetrievedAt(OffsetDateTime.parse(retrievedAtRaw));
             }
