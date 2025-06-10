@@ -18,8 +18,11 @@ public class ExternalReview {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private String pros;
-    private String cons;
+    private String priority;
+    @Column(columnDefinition = "TEXT")
+    private String summary;
+    @Column(columnDefinition = "TEXT")
+    private String recommendation;
     private String author;
     private String date;
     private String source;
@@ -56,22 +59,6 @@ public class ExternalReview {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public String getPros() {
-        return pros;
-    }
-
-    public void setPros(String pros) {
-        this.pros = pros;
-    }
-
-    public String getCons() {
-        return cons;
-    }
-
-    public void setCons(String cons) {
-        this.cons = cons;
     }
 
     public String getAuthor() {
@@ -120,5 +107,29 @@ public class ExternalReview {
 
     public void setReview(Review review) {
         this.review = review;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public String getRecommendation() {
+        return recommendation;
+    }
+
+    public void setRecommendation(String recommendation) {
+        this.recommendation = recommendation;
     }
 }
