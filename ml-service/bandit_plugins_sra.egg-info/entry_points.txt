@@ -1,0 +1,3 @@
+[bandit.plugins]
+aiohttp_ssl_false = bandit_plugins.ssl_false_aiohttp:aiohttp_ssl_false
+print_secret = bandit_plugins.print_secret:print_secret

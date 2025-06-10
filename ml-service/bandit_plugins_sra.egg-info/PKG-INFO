@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: bandit-plugins-sra
+Version: 0.0.1
+Summary: Custom Bandit rules
+Requires-Dist: bandit>=1.7
