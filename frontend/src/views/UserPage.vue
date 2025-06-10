@@ -1,5 +1,8 @@
 <template>
   <div class="user-profile">
+    <div v-if="showPasswordBanner" class="password-banner">
+      <strong>Пожалуйста, смените пароль!</strong>
+    </div>
     <div class="user-header">
       <img :src="avatar" alt="avatar" class="avatar" />
       <div class="user-info">
@@ -24,6 +27,7 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted } from 'vue'
 import defaultAvatar from '@/assets/default-avatar.gif'
@@ -37,20 +41,42 @@ const username = ref('Гость')
 const id = ref(0)
 const email = ref('Guest@guest.com')
 const avatar = ref(defaultAvatar)
-
 const newPassword = ref('')
 const message = ref('')
+const showPasswordBanner = ref(false)
+
+async function fetchUserProfile() {
+  const idCookie = getCookie('userId')
+  if (!idCookie) return
+
+  try {
+    const response = await fetch(`/api/users/${idCookie}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) throw new Error('Не удалось получить данные пользователя')
+
+    const userData = await response.json()
+
+    username.value = userData.username || getCookie('username') || 'Гость'
+    id.value = userData.id || idCookie
+    email.value = userData.email || getCookie('userEmail') || 'Guest@guest.com'
+    avatar.value = getCookie('userAvatar') || defaultAvatar
+
+    // Вот тут флаг смены пароля!
+    if (userData.passwordExpired) {
+      showPasswordBanner.value = true
+    }
+  } catch (err) {
+    console.error('Ошибка при загрузке профиля:', err)
+  }
+}
 
 onMounted(() => {
-  const idCookie = getCookie('userId')
-  const usernameCookie = getCookie('username')
-  const emailCookie = getCookie('userEmail')
-  const avatarCookie = getCookie('userAvatar')
-
-  if (usernameCookie) username.value = usernameCookie
-  if (idCookie) id.value = idCookie
-  if (emailCookie) email.value = emailCookie
-  if (avatarCookie) avatar.value = avatarCookie
+  fetchUserProfile()
 })
 
 async function changePassword() {
@@ -62,13 +88,11 @@ async function changePassword() {
   try {
     const response = await fetch('/api/users/', {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json', // указываем, что отправляем JSON     
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id: parseInt(id.value),
         username: username.value,
-        role: 'ROLE_USER', // если нужно, замени на нужную роль
+        role: 'ROLE_USER',
         password: newPassword.value,
         email: email.value,
       }),
@@ -80,12 +104,15 @@ async function changePassword() {
 
     message.value = 'Пароль успешно изменён!'
     newPassword.value = ''
+    showPasswordBanner.value = false // Баннер больше не нужен
+    // Можно обновить профиль/куки и т.д.
   } catch (err) {
     console.error(err)
     message.value = 'Ошибка при смене пароля.'
   }
 }
 </script>
+
 
 <style scoped>
 .user-profile {
@@ -169,4 +196,16 @@ async function changePassword() {
   font-size: 0.95rem;
   color: green;
 }
+
+.password-banner {
+  background: #fffae6;
+  border: 1px solid #ffb300;
+  color: #b26b00;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.15rem;
+}
+
 </style>
