@@ -254,6 +254,18 @@ const formatDate = (dateStr) => {
   text-decoration: underline;
 }
 
+.external-review-summary,
+.external-review-recommendation {
+  font-size: 1rem;
+  color: #444;
+  line-height: 1.6;
+  text-align: justify;
+  margin-bottom: 0.5rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  word-break: break-word;
+}
 
 .no-external-reviews {
   margin-top: 2rem;
