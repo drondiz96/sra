@@ -80,3 +80,5 @@ ml-service/.vscode/
 ml-service/__pycache__/
 ml-service/.env
 .vscode/
+backend/
+frontend/
