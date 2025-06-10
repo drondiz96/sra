@@ -1,17 +1,8 @@
 <template>
   <div v-if="review" class="review-details">
-    <!-- <h1 class="review-title">{{ review.title }}</h1>
-
-    <h2 class="review-device">
-      {{ review.device.manufacturer }} {{ review.device.model }} ({{ review.device.deviceType }})
-    </h2> -->
     <h1 class="review-title">
       Обзоры на смартфон {{ review.device.manufacturer }} {{ review.device.model }}
     </h1>
-
-    <!-- <p class="review-content">
-      {{ review.content }}
-    </p> -->
 
     <div v-if="review.externalReviews?.length" class="external-reviews">
       <div 
@@ -25,9 +16,17 @@
           </a>
         </h3>
 
-        <p class="external-review-content">
-          {{ ext.content }}
+        <p class="external-review-summary">
+          <strong>Кратко:</strong> {{ ext.summary }}
         </p>
+
+        <p class="external-review-recommendation">
+          <strong>Рекомендация:</strong> {{ ext.recommendation }}
+        </p>
+
+        <div class="external-review-content">
+          {{ ext.content }}
+        </div>
 
         <div class="external-review-meta">
           <div class="external-review-info">
@@ -50,7 +49,6 @@
     <div v-else class="no-external-reviews">
       Обзоры не найдены.
     </div>
-
 
     <div class="review-footer">
       <span class="review-author">Смартфон добавил пользователь: {{ review.author.username }}</span>
