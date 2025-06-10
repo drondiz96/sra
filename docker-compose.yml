@@ -113,6 +113,27 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=secret
     volumes:
       - grafana_data:/var/lib/grafana
+  process_exporter:
+    image: ncabatoff/process-exporter:latest
+    container_name: process_exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - ./monitoring/processes.yml:/config/processes.yml:ro
+    command:
+      - '--procfs=/host/proc'
+      - '--config.path=/config/processes.yml'
+    ports:
+      - "9256:9256"
+
+  docker_exporter:
+    image: prometheuscommunity/docker-engine-exporter:latest
+    container_name: docker_exporter
+    restart: unless-stopped
+    ports:
+      - "9323:9323"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
 volumes:
   postgres_data:  # Определяем том для хранения данных
