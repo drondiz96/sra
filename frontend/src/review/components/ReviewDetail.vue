@@ -24,9 +24,23 @@
           <strong>Рекомендация:</strong> {{ ext.recommendation }}
         </p>
 
-        <div class="external-review-content">
-          {{ ext.content }}
+        <!-- Pros and Cons Lists -->
+        <div class="external-review-pros-cons">
+          <div v-if="ext.pros?.length" class="pros">
+            <strong>Плюсы:</strong>
+            <ul>
+              <li v-for="(pro, index) in ext.pros" :key="index">{{ pro }}</li>
+            </ul>
+          </div>
+          <div v-if="ext.cons?.length" class="cons">
+            <strong>Минусы:</strong>
+            <ul>
+              <li v-for="(con, index) in ext.cons" :key="index">{{ con }}</li>
+            </ul>
+          </div>
         </div>
+
+        
 
         <div class="external-review-meta">
           <div class="external-review-info">
@@ -116,59 +130,6 @@ const formatDate = (dateStr) => {
   gap: 1.5rem;
 }
 
-.review-title {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
-}
-
-.review-device {
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #555;
-  margin-bottom: 1rem;
-}
-
-.review-content {
-  font-size: 1.1rem;
-  line-height: 1.7;
-  color: #333;
-  text-align: justify;
-  padding: 0.5rem 0;
-}
-
-.review-footer {
-  display: flex;
-  justify-content: flex-start;
-  gap: 1.5rem;
-  font-size: 0.9rem;
-  color: #777;
-  margin-top: auto;
-}
-
-.review-image {
-  margin-top: 1.5rem;
-}
-
-.review-image img {
-  max-width: 100%;
-  border-radius: 10px;
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
-}
-
-.loading {
-  text-align: center;
-  padding: 2rem;
-  color: #666;
-  font-style: italic;
-}
-
-
-
-
-
-
 .external-reviews {
   margin-top: 2rem;
   display: flex;
@@ -188,12 +149,33 @@ const formatDate = (dateStr) => {
   text-align: center;
 }
 
+.external-review-pros-cons {
+  display: flex;
+  justify-content: space-around;
+  margin: 1rem 0;
+}
+
+.pros, .cons {
+  text-align: left;
+}
+
+.external-review-priority {
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
 .external-review-title {
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 1rem;
 }
 
+.external-review-content,
+.external-review-summary,
+.external-review-recommendation,
+.external-review-meta {
+  text-align: left;
+}
 
 .external-review-title a {
   color: #3498db;
@@ -202,14 +184,6 @@ const formatDate = (dateStr) => {
 
 .external-review-title a:hover {
   text-decoration: underline;
-}
-
-.external-review-content {
-  font-size: 1rem;
-  color: #333;
-  line-height: 1.6;
-  text-align: justify;
-  margin-bottom: 1rem;
 }
 
 .external-review-meta {
@@ -226,7 +200,6 @@ const formatDate = (dateStr) => {
   color: #555;
 }
 
-
 .author-date {
   display: flex;
   flex-direction: column;
@@ -242,29 +215,14 @@ const formatDate = (dateStr) => {
   padding: 0;
 }
 
-
 .source {
   color: #3498db;
   text-decoration: none;
   white-space: nowrap;
-  margin-left: 1rem;
 }
 
 .source:hover {
   text-decoration: underline;
-}
-
-.external-review-summary,
-.external-review-recommendation {
-  font-size: 1rem;
-  color: #444;
-  line-height: 1.6;
-  text-align: justify;
-  margin-bottom: 0.5rem;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  word-break: break-word;
 }
 
 .no-external-reviews {
@@ -274,4 +232,10 @@ const formatDate = (dateStr) => {
   color: #888;
 }
 
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+}
 </style>
