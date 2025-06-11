@@ -2,9 +2,16 @@
   <div class="p-6">
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-bold">Панель администратора</h1>
-      <button class="bg-gray-700 text-white px-4 py-2 rounded" @click="logout">
-        Выйти
-      </button>
+      <div class="space-x-2">
+        <button
+          class="bg-blue-600 text-white px-4 py-2 rounded"
+            @click="goToGrafana">        >
+          Перейти в Dashboard
+        </button>
+        <button class="bg-gray-700 text-white px-4 py-2 rounded" @click="logout">
+          Выйти
+        </button>
+      </div>
     </div>
     <table class="table-auto w-full border border-gray-300">
       <thead>
@@ -72,6 +79,11 @@ export default {
     this.fetchUsers();
   },
   methods: {
+      goToGrafana() {
+      // полностью отдаём управление браузеру
+      window.location.href = 'https://reviewphoneserve:33003/grafana/login';
+    },
+    
     async fetchUsers() {
       try {
         console.debug("GET /users/all");
@@ -85,7 +97,6 @@ export default {
           this.users = data;
         } else if (res.status === 403) {
           console.warn("Access denied (403) on /users/all");
-          // this.$router.push("/reviews");
         } else {
           console.error("Unexpected response on /users/all:", res.status);
         }
@@ -179,7 +190,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .table-auto th,
