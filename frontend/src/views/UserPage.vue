@@ -24,6 +24,9 @@
       <button @click="changePassword" class="submit-button">Сменить</button>
       <p v-if="message" class="message">{{ message }}</p>
     </div>
+     <div class="app-version">
+        {{ versionKey }} = {{ versionValue }}
+      </div>
   </div>
 </template>
 
@@ -44,6 +47,20 @@ const avatar = ref(defaultAvatar)
 const newPassword = ref('')
 const message = ref('')
 const showPasswordBanner = ref(false)
+
+const versionKey   = ref('—')
+const versionValue = ref('—')
+
+async function fetchVersion() {
+  versionKey.value = 'VERSION'
+  try {
+    const res = await fetch('/VERSION')
+    if (!res.ok) throw new Error(res.statusText)
+    versionValue.value = (await res.text()).trim()
+  } catch (e) {
+    console.error('Не удалось загрузить VERSION:', e)
+  }
+}
 
 async function fetchUserProfile() {
   const idCookie = getCookie('userId')
@@ -78,7 +95,7 @@ async function fetchUserProfile() {
 onMounted(() => {
   fetchUserProfile()
 })
-
+onMounted(fetchVersion)
 async function changePassword() {
   if (!newPassword.value) {
     message.value = 'Введите новый пароль.'

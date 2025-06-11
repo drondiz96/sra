@@ -2,8 +2,18 @@
 FROM node:16 as build-stage
 
 WORKDIR /app
+
+ARG VERSION
+
+# пробрасываем в среду, чтобы можно было читать через process.env
+ENV VUE_APP_VERSION=$VERSION
+
 COPY package*.json ./
 RUN npm install
+
+RUN mkdir -p public
+RUN echo "$VERSION" > public/VERSION
+
 COPY . .
 RUN npm run build
 

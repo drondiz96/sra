@@ -38,6 +38,8 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        VERSION: "${VERSION}"
     container_name: front
     restart: unless-stopped
     ports:

@@ -117,6 +117,7 @@ async function fetchCurrentUser() {
       console.warn('User ID не найден в куках');
       return;
     }
+    console.log(`GET /api/users/${userId}`)
 
     // Делаем запрос через fetch
     const response = await fetch(`/api/users/${userId}`, {
@@ -144,14 +145,9 @@ async function fetchCurrentUser() {
     const userData = await response.json();
     
     // Проверка на просроченный пароль
-if (userData.passwordExpired) {
-  const alreadyRedirected = localStorage.getItem('passwordExpiredRedirect');
-  
-  if (!alreadyRedirected) {
-    localStorage.setItem('passwordExpiredRedirect', 'true'); // Помечаем, что редирект был
-    router.push('/user/me');
-  }
-}
+    if (userData.passwordExpired) {
+      router.push('/user/me');
+    }
     // Обновляем данные пользователя
     user.value = {
       id: userData.id,
