@@ -1,0 +1,20 @@
+groups:
+  - name: process-alerts
+    rules:
+      - alert: HighProcessCPU
+        expr: |
+          # берём мгновенную нагрузку CPU в процентах
+          (rate(process_cpu_seconds_total[1m]) * 100)
+            /
+          # считаем число ядер
+          count(count without(mode)(process_cpu_seconds_total))
+          > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CPU overload on {{ $labels.groupname }}"
+          description: |
+            Процесс {{ $labels.groupname }} потребляет {{ printf "%.1f" $value }}% CPU
+            уже более 2 минут.
+

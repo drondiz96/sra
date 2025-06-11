@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bip
+
+server:
+  address: localhost
+
+external-review:
+  base-url: http://localhost:8000
+

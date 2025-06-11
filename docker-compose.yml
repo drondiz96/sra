@@ -1,0 +1,195 @@
+version: '3.8'
+
+services:
+  postgresql:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.postgres
+    container_name: postgresql
+    restart: "no"
+    environment:
+      POSTGRES_USER: develop
+      POSTGRES_PASSWORD: develop
+      POSTGRES_DB: bip
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - backend_net
+
+  bip_app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.app
+    container_name: bip_app
+    restart: "no"
+    depends_on:
+      - postgresql
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/bip
+      SPRING_DATASOURCE_USERNAME: develop
+      SPRING_DATASOURCE_PASSWORD: develop
+    networks:
+      - backend_net
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VERSION: "${VERSION}"
+    container_name: front
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - backend_net
+      - monitoring
+
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: ml-service
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PIP_NO_CACHE_DIR=on
+    networks:
+      - backend_net
+
+  captcha_server:
+    build:
+      context: ./captcha-service
+      dockerfile: Dockerfile
+    container_name: captcha_server
+    restart: unless-stopped
+    ports:
+      - "33001:33001"
+    networks:
+      - backend_net
+
+  # Monitoring stack
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro 
+    ports:
+      - "9090:9090"
+    depends_on:
+      - node-exporter
+      - cadvisor
+      - process-exporter
+
+    networks:
+      - monitoring
+      
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=secret
+      - GF_SERVER_ROOT_URL=https://reviewphoneserve/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "33000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+  nginx-grafana:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx-grafana
+    restart: unless-stopped
+    depends_on:
+      - grafana
+    ports:
+      - "33002:80"
+      - "33003:443"
+    networks:
+      - monitoring
+
+  node-exporter:    
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev)($|/)"'
+    networks:
+      - monitoring
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+
+
+      
+  process-exporter:
+    image: ncabatoff/process-exporter:latest
+    container_name: process-exporter
+    restart: unless-stopped
+    # монтируем procfs, чтобы exporter видел процессы на хосте
+    volumes:
+      - /proc:/host/proc:ro
+      - ./monitoring/process-exporter.yml:/etc/process-exporter/config.yml:ro
+    command:
+      - '-config.path=/etc/process-exporter/config.yml'
+      - '-web.listen-address=:9256'
+    ports:
+      - "9256:9256"
+    networks:
+      - monitoring
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro  
+    ports:
+      - "9093:9093"
+    networks:
+      - monitoring
+
+
+volumes:
+  postgres_data:
+  grafana_data:
+
+networks:
+  backend_net:
+    driver: bridge
+  monitoring:
+    driver: bridge

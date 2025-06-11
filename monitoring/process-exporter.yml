@@ -1,0 +1,7 @@
+# monitoring/process-exporter.yml
+process_names:
+  # Группа по полной команде запуска процесса
+  - name: "{{.Cmdline}}"
+    cmdline:
+      - '.*'
+

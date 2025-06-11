@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=60", "wheel"]   # ← добавили
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bandit-plugins-sra"
+version = "0.0.1"
+description = "Custom Bandit rules"
+dependencies = ["bandit>=1.7"]
+
+[tool.setuptools]
+packages = ["bandit_plugins"]        # ← только этот пакет
+
+[project.entry-points."bandit.plugins"]
+aiohttp_ssl_false = "bandit_plugins.ssl_false_aiohttp:aiohttp_ssl_false"
+print_secret      = "bandit_plugins.print_secret:print_secret"
+

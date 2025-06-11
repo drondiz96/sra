@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgresql:5432/bip
+
+server:
+  address: 0.0.0.0
+
+external-review:
+  base-url: http://ml-service:8000
