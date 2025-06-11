@@ -3,13 +3,13 @@
       <h2>Регистрация</h2>
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
-          <label for="username">Почта пользователя:</label>
+          <label for="username">Имя пользователя:</label>
           <input
             type="text"
             id="username"
             v-model="username"
             required
-            placeholder="Введите вашу почту"
+            placeholder="Введите имя пользователя"
           />
         </div>
         <div class="form-group">
