@@ -3,13 +3,13 @@
     <h2>Авторизация</h2>
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
-        <label for="username">Имя пользователя:</label>
+        <label for="username">Почта:</label>
         <input
           type="text"
           id="username"
           v-model="username"
           required
-          placeholder="Введите имя пользователя"
+          placeholder="Введите почту"
         />
       </div>
       <div class="form-group">
